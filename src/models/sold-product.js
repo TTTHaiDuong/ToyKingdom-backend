@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
 
-            // Sản phẩm được bán là một sản phẩm
-            SoldProduct.belongsTo(models.Product);
+            // Một bản ghi sản phẩm được bán là một bản ghi sản phẩm
+            SoldProduct.belongsTo(models.Product, { foreignKey: 'productId' });
         }
     }
     SoldProduct.init({
@@ -20,10 +20,12 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'Product',
                 key: 'id'
             },
-            onDelete: 'CASCADE',
+            onDelete: 'SET NULL',
             onUpdate: 'CASCADE'
         },
-        userId: DataTypes.INTEGER,
+        userId: {
+            type: DataTypes.INTEGER,
+        },
         totalAmount: DataTypes.INTEGER,
         quantity: DataTypes.INTEGER,
         saleDate: DataTypes.DATE,

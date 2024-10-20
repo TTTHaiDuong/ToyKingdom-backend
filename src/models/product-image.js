@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
 
       // Hình ảnh sản phẩm thuộc một sản phẩm
-      ProductImage.belongsTo(models.Product);
+      ProductImage.belongsTo(models.Product, { foreignKey: 'productId' });
     }
   }
   ProductImage.init({

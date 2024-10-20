@@ -67,6 +67,7 @@ const findProducts = async (conditions, exclude, page = 1, limit = 10, callback)
 
         const where = {
             ...(id && { id: { [Op.like]: `%${id}%` } }),
+            //...(id && { id: id }),
             ...(name && Sequelize.where(Sequelize.fn('search_string', Sequelize.col('name'), name), true)),
             ...(price && { price: { [Op.between]: [price.from, price.to] } }),
             ...(brand && Sequelize.where(Sequelize.fn('search_string', Sequelize.col('brand'), brand), true)),
@@ -86,73 +87,59 @@ const findProducts = async (conditions, exclude, page = 1, limit = 10, callback)
             {
                 // Join với bảng ProductReview
                 model: db.ProductReview,
-                attributes: []
+                attributes: [],
+                require: false
             },
             {
-                // Join với bảng ProductCategory
-                model: db.ProductCategory,
-                attributes: [],
-                include: [{
-                    model: db.Category,
-                    attributes: [[Sequelize.col('id'), 'categoryId'], 'name'],
-                    ...(categories && { where: { name: { [Op.in]: categories } } })
-                }]
+                model: db.Category,
+                attributes: [[Sequelize.col('id'), 'categoryId'], 'name'],
+                require: false,
+                ...(categories && { where: { name: { [Op.in]: categories } } })
             },
             {
                 // Join với bảng Discount
                 model: db.Discount,
                 attributes: [[Sequelize.col('percentage'), 'saleOff'], 'startDate', 'endDate'],
+                require: false,
                 ...(discount && { where: { percentage: { [Op.between]: [discount.from, discount.to] } } })
             },
             {
                 // Join với bảng SoldProduct
                 model: db.SoldProduct,
-                attributes: []
+                attributes: ['totalAmount', [Sequelize.fn('sum', Sequelize.col('totalAmount')), 'revenue']],
+                require: false,
             },
             {
                 // Join với bảng ProductImage
                 model: db.ProductImage,
                 attributes: ['url', 'order'],
-                order: [['order', 'ASC']]
+                order: [['order', 'ASC']],
+                require: false,
             }];
 
-        const having = {
-            ...(revenue && {
-                [Sequelize.fn('SUM', Sequelize.col('SoldProduct.totalAmount'))]
-                    : { [Op.between]: [revenue.from, revenue.to] }
-            }),
-            ...(soldQuantity && {
-                [Sequelize.fn('SUM', Sequelize.col('SoldProduct.quantity'))]
-                    : { [Op.between]: [soldQuantity.from, soldQuantity.to] }
-            }),
-            ...(rating && {
-                [Sequelize.fn('AVG', Sequelize.col('ProductReview.rating'))]
-                    : { [Op.between]: [rating.from, rating.to] }
-            })
-        }
-
         const products = await db.Product.findAll({
-            where: where,
-            include: include,
-            limit: limit, // Số lượng bản ghi tối đa trả về
-            offset: (page - 1) * limit,
-            group: ['Product.id'],
-            having: having,
-            order: orders,
             attributes: {
                 include: [
-                    [Sequelize.fn('SUM', Sequelize.col('SoldProduct.quantity')), 'totalSold'],
-                    [Sequelize.fn('SUM', Sequelize.col('SoldProduct.totalAmount')), 'revenue'],
-                    [Sequelize.fn('AVG', Sequelize.col('ProductReview.rating')), 'rating'],
+                    //[Sequelize.fn('SUM', Sequelize.col('SoldProducts.quantity')), 'revenue']
+                    // [Sequelize.fn('SUM', Sequelize.col('Product->SoldProducts.totalAmount')), 'revenue']
                 ],
                 exclude: exclude ? exclude : []
-            }
+            },
+            include: include,
+            where: where,
+            group: ['Product.id'],
+            order: orders,
+            limit: limit,
+            offset: (page - 1) * limit,
         });
+
+        console.log(JSON.stringify(products, null, 2));
 
         if (callback) callback(products, null);
         else return products;
     }
     catch (err) {
+        console.error(err);
         if (callback) callback(null, err);
         else throw err;
     }
@@ -167,7 +154,7 @@ const findProducts = async (conditions, exclude, page = 1, limit = 10, callback)
  */
 const getOneProduct = async (id, exclude, callback) => {
     try {
-        const product = await findProducts({ id: id }, exclude)[0];
+        const product = (await findProducts({ id: id, revenue: { from: 0, to: 100000000 } }, exclude))[0];
         if (callback) callback(product, null);
         else return product;
     }

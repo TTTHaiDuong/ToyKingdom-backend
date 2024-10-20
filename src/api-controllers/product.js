@@ -11,8 +11,7 @@ const getOneProduct_Admin = async (req, res) => {
     if (productId) {
         productServices.getOneProduct(productId, null, (product, err) => {
             if (product) {
-                console.log(JSON.stringify(product, null, 2));
-                //return res.status(200).json({ user, message: 'Ok' });
+                return res.status(200).json({ product: JSON.stringify(product, null, 2), message: 'Ok' });
             }
             else return res.status(500).json({ message: 'Server error' });
         });

@@ -2,7 +2,8 @@ import express from 'express';
 import loginController from '../api-controllers/login';
 import userController from '../api-controllers/user';
 import productController from '../api-controllers/product';
-import middlewares from '../middlewares/passport'
+import middlewares from '../middlewares/passport';
+import signUp from '../api-controllers/sign-up';
 
 const router = express.Router();
 
@@ -24,8 +25,9 @@ const initWebRouters = (app) => {
 const initPublicRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/', loginController.getHomePage);
-    router.post('/submit-login', loginController.submitLogin);
+    router.get('/', loginController.getHomePage); // Trang chủ
+    router.post('/sign-up', signUp); // Đăng ký
+    router.post('/submit-login', loginController.submitLogin); // Yêu cầu đăng nhập
 
     return parentRouter.use('/', router);
 }
@@ -34,7 +36,8 @@ const initPublicRoutes = (parentRouter) => {
 const initUserRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/get-profile', userController.getOneUser);
+    router.get('/get-profile', userController.getUserProfile);
+    router.put('/update-profile', userController.updateUserProfile);
 
     return parentRouter.use('/user', router);
 }

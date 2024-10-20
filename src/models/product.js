@@ -15,20 +15,21 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'productId',
         otherKey: 'categoryId'
       });
+
       // (0..1) Một sản phẩm có một hoặc không giảm giá
-      Product.belongsTo(models.Discount, {
-        foreignKey: 'discountId'
-      });
+      Product.belongsTo(models.Discount, { foreignKey: 'discountId' });
+
       // (0..N) Một sản phẩm có thể có nhiều hình ảnh sản phẩm của nó
-      Product.hasMany(models.ProductImage);
+      Product.hasMany(models.ProductImage, { foreignKey: 'productId' });
+
       // (0..N) Một sản phẩm có thể có nhiều đánh giá sản phẩm
-      Product.hasMany(models.ProductReview);
+      Product.hasMany(models.ProductReview, { foreignKey: 'productId' });
+
       // (0..N) Một sản phẩm có thể được bán nhiều lần
-      Product.hasMany(models.SoldProduct);
+      Product.hasMany(models.SoldProduct, { foreignKey: 'productId' });
+
       // (0..1) Một sản phẩm có thể là một sản phẩm trong kho
-      Product.hasOne(models.InventoryProduct, {
-        foreignKey: 'productId'
-      });
+      Product.hasOne(models.InventoryProduct, { foreignKey: 'productId' });
     }
   }
   Product.init({
@@ -44,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
         model: 'Discount',
         key: 'id'
       },
-      onDelete: 'CASCADE',
+      onDelete: 'SET NULL',
       onUpdate: 'CASCADE'
     }
   }, {

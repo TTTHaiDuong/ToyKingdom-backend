@@ -10,13 +10,19 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
 
             // Một sản phẩm trong kho được xem là một sản phẩm
-            InventoryProduct.belongsTo(models.Product, {
-                foreignKey: 'productId'
-            });
+            InventoryProduct.belongsTo(models.Product, { foreignKey: 'productId' });
         }
     }
     InventoryProduct.init({
-        productId: DataTypes.INTEGER,
+        productId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'Product',
+                key: 'id'
+            },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        },
         quantity: DataTypes.INTEGER,
         forSale: DataTypes.BOOLEAN
     }, {

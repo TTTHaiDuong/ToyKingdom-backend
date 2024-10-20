@@ -5,7 +5,6 @@ import configViewEngine from './config/view-engine';
 import connectDB from './config/db-connection';
 import session from 'express-session';
 import 'dotenv/config';
-import sendSms from './services/send-sms';
 
 // Khởi tạo ứng dụng bằng express
 let app = express();
@@ -39,7 +38,7 @@ configViewEngine(app); // Cấu hình view engine
 initWebRouters(app); // Khởi tạo router
 
 // connectDB.testConnection(); // Test connection
-connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
+//connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
 
 // Đường dẫn không tồn tại (trang 404)
 app.use((req, res) => {

@@ -5,12 +5,12 @@ import bcrypt from 'bcryptjs';
 
 /**
  * Tạo mật khẩu mới cho người dùng
- * @param {{id: Number?, email: String?, phone: String?}} userInfo thông tin người dùng
+ * @param {Number} userId thông tin người dùng
  * @param {String} password mật khẩu chưa băm 
  * @param {function(Error?)?} callback (error)
  * @returns {Promise<void> | void}
  */
-const generatePassword = async (userInfo, password, callback) => {
+const generatePassword = async (userId, password, callback) => {
     try {
         // Băm mật khẩu
         const hashedPass = await bcrypt.hash(password, 10);
@@ -18,7 +18,7 @@ const generatePassword = async (userInfo, password, callback) => {
         // Cập nhật vào bản ghi
         const [updatedCount] = await db.User.update({
             password: hashedPass
-        }, { where: userInfo });
+        }, { where: { id: userId } });
 
         // Nếu không có bản ghi nào được cập nhật
         if (updatedCount == 0) {

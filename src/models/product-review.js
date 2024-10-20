@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
 
       // Đánh giá sản phẩm thuộc một sản phẩm
-      ProductReview.belongsTo(models.Product);
+      ProductReview.belongsTo(models.Product, { foreignKey: 'productId' });
     }
   }
   ProductReview.init({

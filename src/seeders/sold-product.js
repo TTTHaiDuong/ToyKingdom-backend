@@ -20,7 +20,7 @@ module.exports = {
                 userId: 4,
                 totalAmount: 1596000,
                 quantity: 4,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 15 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 15 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             },
@@ -29,7 +29,7 @@ module.exports = {
                 userId: 5,
                 totalAmount: 3295000,
                 quantity: 5,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 30 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 30 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             },
@@ -38,7 +38,7 @@ module.exports = {
                 userId: 5,
                 totalAmount: 4170000,
                 quantity: 5,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 45 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 45 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             },
@@ -47,7 +47,7 @@ module.exports = {
                 userId: 6,
                 totalAmount: 1756000,
                 quantity: 4,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 60 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 60 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             },
@@ -56,7 +56,7 @@ module.exports = {
                 userId: 6,
                 totalAmount: 12072000,
                 quantity: 4,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 75 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 75 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             },
@@ -65,7 +65,7 @@ module.exports = {
                 userId: 7,
                 totalAmount: 1645000,
                 quantity: 5,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 100 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 100 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             },
@@ -74,7 +74,7 @@ module.exports = {
                 userId: 7,
                 totalAmount: 6395000,
                 quantity: 5,
-                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0) + 125 * 24 * 60 * 60 * 1000),
+                saleDate: new Date(new Date(2024, 9, 10, 0, 0, 0).getTime() + 125 * 24 * 60 * 60 * 1000),
                 createdAt: new Date(2024, 9, 10, 0, 0, 0),
                 updatedAt: new Date(2024, 9, 10, 0, 0, 0)
             }
