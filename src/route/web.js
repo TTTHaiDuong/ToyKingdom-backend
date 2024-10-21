@@ -46,7 +46,7 @@ const initUserRoutes = (parentRouter) => {
 const initAdminRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/', loginController.getHomePage)
+    router.get('/get-users', userController.getUsers_Admin);
     router.get('/get-product/:id', productController.getOneProduct_Admin);
 
     return parentRouter.use('/admin', router);

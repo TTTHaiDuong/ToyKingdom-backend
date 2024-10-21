@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
     rating: DataTypes.DECIMAL(2, 1),
     comment: DataTypes.TEXT,
     reviewDate: DataTypes.DATE,
-    sellerRespone: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'ProductReview',

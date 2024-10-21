@@ -31,50 +31,49 @@ const getProducts = async (page = 1, limit = 10, callback) => {
 
 /**
  * Tìm sản phẩm
- * @param {{id: Number?, name: String?, price: {from: Number, to: Number}?, 
- * stockQuantity: {from: Number, to: Number}?, brand: String?, 
- * suitableAge: {from: Number, to: Number}?, tag: String?, 
- * createdAt: {from: Date, to: Date}?, updatedAt: {from: Date, from: Date}?, 
- * discount: {from: Number, to: Number}?, revenue: {from: Number, to: Number}?,
- * soldQuantity: {from: Number, to: Number}?, categories: [String]?,
- * rating: {from: Number, to: Number}?, order: [{by: String, isAsc: Boolean}]?}} conditions điều kiện tìm
+ * @param {{id: Number | [Number, Boolean], name: String | [String, Boolean], 
+ * price: Number | [Number, Number], stockQuantity: Number | [Number, Number], 
+ * brand: String | [String, Boolean], suitableAge: Number | [Number, Number], 
+ * tag: String | [String, Boolean], createdAt: Date | [Date, Date], 
+ * updatedAt: Date | [Date, Date], discount: Number | [Number, Number], 
+ * revenue: Number | [Number, Number], soldQuantity: Number | [Number, Number], 
+ * categories: [String], rating: Number | [Number, Number], 
+ * order: [{by: String, type: String}]?}} conditions điều kiện tìm
  * 
  * @param {Number} page số trang
  * @param {Number} limit số lượng bản ghi tối đa trả về
  * @param {function([Product]?, Error?)?} callback (products, error)
-* @returns {Promise<[Product]> | void}
+ * @returns {Promise<[Product]> | void}
  */
 const findProducts = async (conditions, exclude, page = 1, limit = 10, callback) => {
     try {
-        const { id, name, price, brand, suitableAge, tag, createdAt, rating,
+        let { id, name, price, brand, suitableAge, tag, createdAt, rating,
             updatedAt, stockQuantity, discount, revenue, soldQuantity, categories, order } = conditions;
 
         // Sắp xếp các bản ghi theo thứ tự
-        const orders = order && Array.isArray(order)
-            ? order.map(({ by, isAsc }) => {
-                const type = isAsc ? 'ASC' : 'DESC';
-
-                switch (by) {
-                    case 'totalSold': return [Sequelize.fn('SUM', Sequelize.col('SoldProduct.quantity')), type];
-                    case 'discount': return ['Discount.percentage', type];
-                    case 'totalAmount': return [Sequelize.fn('SUM', Sequelize.col('SoldProduct.totalAmount')), type];
-                    case 'rating': return [Sequelize.fn('AVG', Sequelize.col('ProductReview.rating')), type]
-                    default: return [by, type];
-                }
-            })
-            : [['id', 'ASC']];
+        order = order || [['id', 'ASC']];
 
 
         const where = {
-            ...(id && { id: { [Op.like]: `%${id}%` } }),
-            //...(id && { id: id }),
-            ...(name && Sequelize.where(Sequelize.fn('search_string', Sequelize.col('name'), name), true)),
-            ...(price && { price: { [Op.between]: [price.from, price.to] } }),
-            ...(brand && Sequelize.where(Sequelize.fn('search_string', Sequelize.col('brand'), brand), true)),
-            ...(suitableAge && { suitableAge: { [Op.between]: [suitableAge.from, suitableAge.to] } }),
-            ...(tag && Sequelize.where(Sequelize.fn('search_string', Sequelize.col('tag'), tag), true)),
-            ...(createdAt && { createdAt: { [Op.between]: [createdAt.from, createdAt.to] } }),
-            ...(updatedAt && { updatedAt: { [Op.between]: [updatedAt.from, updatedAt.to] } })
+            ...(id && (Array.isArray(id) ? (id[1] === true ? { id: id }
+                : { id: { [Op.like]: `%${id}%` } }) : { id: id })),
+
+            ...(name && (Array.isArray(name) ? (name[1] === true ? { name: name }
+                : Sequelize.where(Sequelize.fn('search_string', Sequelize.col('name'), name), true)) : { name: name })),
+
+            ...(price && (Array.isArray(price) ? { price: { [Op.between]: [price[0], price[1]] } } : { price: price })),
+
+            ...(brand && (Array.isArray(brand) ? (brand[1] === true ? { brand: brand }
+                : Sequelize.where(Sequelize.fn('search_string', Sequelize.col('brand'), brand), true)) : { brand: brand })),
+
+            ...(suitableAge && (Array.isArray(suitableAge) ? { suitableAge: { [Op.between]: [suitableAge[0], suitableAge[1]] } }
+                : { suitableAge: suitableAge })),
+
+            ...(tag && (Array.isArray(tag) ? (tag[1] === true ? { tag: tag }
+                : Sequelize.where(Sequelize.fn('search_string', Sequelize.col('tag'), tag), true)) : { tag: tag })),
+
+            ...(createdAt && (Array.isArray(createdAt) ? { createdAt: createdAt } : { createdAt: { [Op.between]: [createdAt[0], createdAt[1]] } })),
+            ...(updatedAt && (Array.isArray(updatedAt) ? { updatedAt: updatedAt } : { updatedAt: { [Op.between]: [updatedAt[0], updatedAt[1]] } }))
         }
 
         const include = [
@@ -82,7 +81,9 @@ const findProducts = async (conditions, exclude, page = 1, limit = 10, callback)
                 // Join với bảng InventoryProduct
                 model: db.InventoryProduct,
                 attributes: [[Sequelize.col('quantity'), 'stockQuantity'], 'forSale'],
-                ...(stockQuantity && { where: { quantity: { [Op.between]: [stockQuantity.from, stockQuantity.to] } } })
+
+                ...(stockQuantity && (Array.isArray(stockQuantity) ? { stockQuantity: { [Op.between]: [stockQuantity[0], stockQuantity[1]] } }
+                    : { stockQuantity: stockQuantity })),
             },
             {
                 // Join với bảng ProductReview
@@ -120,7 +121,7 @@ const findProducts = async (conditions, exclude, page = 1, limit = 10, callback)
         const products = await db.Product.findAll({
             attributes: {
                 include: [
-                    //[Sequelize.fn('SUM', Sequelize.col('SoldProducts.quantity')), 'revenue']
+                    [Sequelize.fn('SUM', Sequelize.col('SoldProducts.quantity')), 'revenue']
                     // [Sequelize.fn('SUM', Sequelize.col('Product->SoldProducts.totalAmount')), 'revenue']
                 ],
                 exclude: exclude ? exclude : []
@@ -128,7 +129,7 @@ const findProducts = async (conditions, exclude, page = 1, limit = 10, callback)
             include: include,
             where: where,
             group: ['Product.id'],
-            order: orders,
+            order: order,
             limit: limit,
             offset: (page - 1) * limit,
         });

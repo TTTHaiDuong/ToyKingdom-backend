@@ -18,6 +18,18 @@ const getUserProfile = async (req, res) => {
     }
 }
 
+const getUsers_Admin = async (req, res) => {
+    const { query, page, limit } = req.query;
+
+    findUser(query, page, limit, (users, err) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        else return res.status(200).json({
+            users: users,
+            message: 'Ok'
+        })
+    });
+}
+
 const updateUserProfile = async (req, res) => {
     const accessToken = req.params.accessToken;
     const { email, phone, fullName, createdAt, updatedAt } = req.body;
@@ -42,5 +54,6 @@ const updateUserProfile = async (req, res) => {
 
 export default {
     getUserProfile,
-    updateUserProfile
+    updateUserProfile,
+    getUsers_Admin
 }

@@ -29,10 +29,6 @@ module.exports = {
       reviewDate: {
         type: Sequelize.DATE
       },
-      /**Người bán phản hồi */
-      sellerRespone: {
-        type: Sequelize.TEXT
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

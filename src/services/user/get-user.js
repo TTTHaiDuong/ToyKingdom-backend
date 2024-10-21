@@ -5,8 +5,8 @@ import db from '../../models/index';
  * Tìm người dùng
  * @param {{id: Number | [Number, Boolean], email: String | [String, Boolean], 
  * phone: String ! [String, Boolean], fullName: String | [String, Boolean], 
- * role: String | [String | Boolean], createdAt: [Date, Date], 
- * updatedAt: [Date, Date], order: [{by: String, isAsc: Boolean}]?}} conditions 
+ * role: String | [String | Boolean], createdAt: Date | [Date, Date], 
+ * updatedAt: Date | [Date, Date], order: [{by: String, type: String}]?}} conditions 
  * điều kiện tìm (mặc định là tìm chính xác có thể sử dụng 'key: value' hoặc 'key: [value, true]'). 
  * Tìm gần đúng bằng cách sử dụng 'key :[value, false]'
  * 
@@ -36,8 +36,8 @@ const findUser = async (conditions, page = 1, limit = 10, callback) => {
             ...(role && (Array.isArray(role) ? (role[1] === true ? { role: role }
                 : { role: { [Op.like]: `%${role}%` } }) : { role: role })),
 
-            ...(createdAt && { createdAt: { [Op.between]: [createdAt.from, createdAt.to] } }),
-            ...(updatedAt && { updatedAt: { [Op.between]: [updatedAt.from, updatedAt.to] } })
+            ...(createdAt && (Array.isArray(createdAt) ? { createdAt: createdAt } : { createdAt: { [Op.between]: [createdAt[0], createdAt[1]] } })),
+            ...(updatedAt && (Array.isArray(updatedAt) ? { updatedAt: updatedAt } : { updatedAt: { [Op.between]: [updatedAt[0], updatedAt[1]] } }))
         };
 
         const users = await db.User.findAll({
