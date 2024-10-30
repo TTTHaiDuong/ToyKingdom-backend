@@ -21,7 +21,7 @@ const sendSms = async (from, to, text, callback) => {
         to: to,
         subject: 'test',
         content: { text: text }
-    }).catch(err => { callback(null, err); return; });
+    }).catch(err => { callback(err, null); return; });
 
     callback(response, null);
 }

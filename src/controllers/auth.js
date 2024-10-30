@@ -1,21 +1,26 @@
-import accountServices from '../services/account';
+import authServices from '../services/auth';
 import passwordServices from '../services/password';
+import tokenServices from '../services/token';
 import sendEmail from '../services/send-email';
 
-/**
- * Yêu cầu đăng nhập
- * @param {{email: String?, phone: String?, password: String}} req.body
- * @return {{refreshToken: String, accessToken: String, message: String}}
- */
 const login = async (req, res) => {
     const { email, phone, password } = req.body;
 
     if (!email && !phone) return res.status(401).json({ message: 'Missing email or phone' });
     if (!password) return res.status(401).json({ message: 'Missing password' });
 
-    accountServices.login({ email, phone }, password, (tokenPair, err) => {
+    authServices.login({ email, phone }, password, (err, tokenPair) => {
         if (err) return res.status(400).json({ message: 'Failed login' });
         return res.status(200).json({ ...tokenPair, message: 'Ok' });
+    });
+}
+
+const logout = async (req, res) => {
+    const { id } = req.tokenPayload;
+
+    authServices.logout(id, (err) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ message: 'Ok' });
     });
 }
 
@@ -23,7 +28,7 @@ const login = async (req, res) => {
 const signup = async (req, res) => {
     const { email, phone, fullName, password } = req.body;
 
-    accountServices.signup(email, phone, fullName, password, (user, err) => {
+    authServices.signup(email, phone, fullName, password, (err, user) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ user: user, message: 'Ok' })
     });
@@ -33,7 +38,7 @@ const changePassword = async (req, res) => {
     const { id } = req.tokenPayload;
     const { oldPassword, newPassword } = req.body;
 
-    const isVerified = await passwordServices.verify(id, oldPassword, (result, err) => {
+    const isVerified = await passwordServices.verify(id, oldPassword, (err, result) => {
         if (err || !result) return false; return true;
     });
 
@@ -42,6 +47,16 @@ const changePassword = async (req, res) => {
     passwordServices.generate(id, newPassword, (err) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ message: 'Ok' })
+    });
+}
+
+const refreshAccessToken = async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const refreshToken = authHeader && authHeader.split(' ')[1];
+
+    tokenServices.refreshAccessToken(refreshToken, (err, accessToken) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ accessToken: accessToken, message: 'Ok' })
     });
 }
 
@@ -55,7 +70,8 @@ let requestOtpVieEmail = async (req, res) => {
 
 export default {
     login,
+    logout,
     signup,
     changePassword,
-    requestOtpVieEmail
+    refreshAccessToken
 }

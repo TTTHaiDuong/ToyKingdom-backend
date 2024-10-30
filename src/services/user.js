@@ -22,7 +22,7 @@ const upsert = async (id, changes, transaction, callback) => {
         if (check) {
             const err = customError('InvalidRegisterInfoError');
             err.stack = check;
-            if (callback) return callback(null, err);
+            if (callback) return callback(err, null);
             throw err;
         }
 
@@ -37,17 +37,17 @@ const upsert = async (id, changes, transaction, callback) => {
             const [updatedCount] = await db.User.update(data, {
                 where: { id: id }, transaction: transaction
             });
-            if (callback) return callback(updatedCount, null);
+            if (callback) return callback(null, updatedCount);
             return updatedCount;
         }
         else {
             const user = await db.User.create(data, { transaction: transaction });
-            if (callback) return callback(user, null);
+            if (callback) return callback(null, user);
             return user;
         }
     }
     catch (err) {
-        if (callback) return callback(err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -74,11 +74,28 @@ const validateRegisterInfo = async ({ email, phone }, option, callback) => {
         }
 
         const result = errors.length !== 0 ? errors : null;
-        if (callback) return callback(result, null);
+        if (callback) return callback(null, result);
         return result;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
+        throw err;
+    }
+}
+
+const findOne = async (id, exclude, callback) => {
+    try {
+        const user = await db.User.findByPk(id, {
+            attributes: {
+                exclude: Array.isArray(exclude) ? [...exclude, 'password'] : [exclude && exclude, 'password']
+            }
+        });
+
+        if (callback) return callback(null, user);
+        return user;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -133,16 +150,16 @@ const findAll = async (conditions, page = 1, limit = 10, callback) => {
             where: where,
             order: order || [['id', 'ASC']],
             offset: (page - 1) * limit,
-            limit: limit,
+            limit: +limit,
             raw: true
         });
 
-        if (callback) callback(users, null);
-        else return users;
+        if (callback) callback(null, users);
+        return users;
     }
     catch (err) {
-        if (callback) callback(null, err);
-        else throw err;
+        if (callback) callback(err, null);
+        throw err;
     }
 }
 
@@ -158,17 +175,18 @@ const destroy = async (ids, transaction, callback) => {
             where: { id: ids }
         }, { transaction: transaction });
 
-        if (callback) return callback(deleted, null);
+        if (callback) return callback(null, deleted);
         return deleted;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
 
 export default {
     upsert,
+    findOne,
     findAll,
     destroy
 }

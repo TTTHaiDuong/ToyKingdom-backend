@@ -15,10 +15,10 @@ const userRoles = {
  * @param {function(Error)} callback (error) 
  */
 const checkRole = (role) => async (req, res, next) => {
-    const { accesstoken } = req.headers;
-    console.log(accesstoken);
+    const authHeader = req.headers['authorization'];
+    const accessToken = authHeader && authHeader.split(' ')[1];
 
-    token.verify({ accessToken: accesstoken }, (decode, err) => {
+    token.verify({ accessToken: accessToken }, (err, decode) => {
         if (err || !decode) return res.status(401).json({ message: 'Unauthorized' });
 
         if (!userRoles[role]?.includes(decode.role))

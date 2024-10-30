@@ -29,17 +29,17 @@ const upsert = async (id, attributes, transaction, callback) => {
 
         if (id) {
             const [updatedCount] = await db.Product.update(data, { where: { id: id }, include: include, transaction: transaction });
-            if (callback) return callback(updatedCount, null);
+            if (callback) return callback(null, updatedCount);
             return updatedCount;
         }
         else {
             const product = await db.Product.create(data, { include: include, transaction: transaction });
-            if (callback) return callback(product, null);
+            if (callback) return callback(null, product);
             return product;
         }
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -107,11 +107,11 @@ const findOne = async (id, exclude, callback) => {
             group: ['Product.id', 'Categories.id', 'SoldProducts.id', 'ProductImages.id', 'ProductReviews.id']
         });
 
-        if (callback) return callback(product, null);
+        if (callback) return callback(null, product);
         return product;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -234,14 +234,14 @@ const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
             having: having,
             order: order || [['id', 'ASC']],
             offset: (page - 1) * limit,
-            limit: limit
+            limit: +limit
         });
 
-        if (callback) return callback(products, null);
+        if (callback) return callback(null, products);
         return products;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -258,11 +258,11 @@ const destroy = async (ids, transaction, callback) => {
             where: { id: ids }
         }, { transaction: transaction });
 
-        if (callback) return callback(deleted, null);
+        if (callback) return callback(null, deleted);
         return deleted;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }

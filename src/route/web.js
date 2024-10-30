@@ -1,5 +1,5 @@
 import express from 'express';
-import accountController from '../controllers/account';
+import authController from '../controllers/auth';
 import userController from '../controllers/user';
 import productController from '../controllers/product';
 import passport from '../middlewares/passport';
@@ -16,17 +16,26 @@ const initWebRouters = (app) => {
     // initOwnerRoutes(router);
     initRegisteredRoutes(router);
 
-    return app.use('/api', router);
+    app.use('/api', router);
+    app.use((req, res) => {
+        return res.status(404).json({
+            path: req.path,
+            method: req.method,
+            message: 'Path not found'
+        });
+    });
 }
 
 /** Khởi tạo đường dẫn công cộng */
 const initPublicRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.post('/login', accountController.login); // Yêu cầu đăng nhập
-    router.post('/signup', accountController.signup);
-    router.get('/product/findAll', productController.findAllProducts);
-    router.get('/product/findOne', productController.findOneProduct);
+    router.post('/login', authController.login); // Yêu cầu đăng nhập
+    router.post('/signup', authController.signup);
+    router.post('/access/refresh', authController.refreshAccessToken);
+
+    router.get('/product/findAll', productController.findAll);
+    router.get('/product/findOne', productController.findOne);
 
     // Đăng ký
     // router.get('/product/find_all', productController.findOne_Amin);
@@ -48,14 +57,14 @@ const initUserRoutes = (parentRouter) => {
 const initAdminRoutes = (parentRouter) => {
     const router = express.Router();
 
-    // router.get('/user/find', userController.getUsers_Admin);
+    router.get('/user/findAll', userController.findAll);
     // router.delete('/user/delete', productController.getOneProduct_Admin);
 
-    router.post('/product/create', productController.createProduct);
-    router.get('/product/findAll', productController.findAllProducts);
-    router.get('/product/findOne', productController.findOneProduct);
-    router.put('/product/update', productController.updateProduct);
-    router.delete('/product/delete', productController.deleteProducts);
+    router.post('/product/create', productController.create);
+    router.get('/product/findAll', productController.findAll);
+    router.get('/product/findOne', productController.findOne);
+    router.put('/product/update', productController.update);
+    router.delete('/product/delete', productController.destroy);
 
     return parentRouter.use('/admin', router);
 }
@@ -72,7 +81,10 @@ const initOwnerRoutes = (parentRouter) => {
 const initRegisteredRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.put('/password/update', accountController.changePassword);
+    router.delete('/logout', authController.logout);
+    router.put('/password/update', authController.changePassword);
+
+    router.get('/user/findOne', userController.findOne);
 
     return parentRouter.use('/registered', router);
 }

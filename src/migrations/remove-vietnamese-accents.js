@@ -2,6 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    await this.down(queryInterface, Sequelize);
     await queryInterface.sequelize.query(`
             CREATE FUNCTION remove_vietnamese_accents(input VARCHAR(255))
             RETURNS VARCHAR(255)

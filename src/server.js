@@ -34,16 +34,11 @@ app.use(session({
 app.use(express.json()); // Middleware để xử lý json từ client
 app.use(express.urlencoded({ extended: true })); // Cấu hình xử lý dữ liệu từ form HTML
 
-configViewEngine(app); // Cấu hình view engine
+// configViewEngine(app); // Cấu hình view engine
 initWebRouters(app); // Khởi tạo router
 
 // connectDB.testConnection(); // Test connection
 //connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
-
-// Đường dẫn không tồn tại (trang 404)
-app.use((req, res) => {
-    return res.render('404.ejs');
-});
 
 // Chạy server
 app.listen(+process.env.PORT, () => {

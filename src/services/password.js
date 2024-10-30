@@ -53,7 +53,7 @@ const verify = async (userId, password, callback) => {
         // Nếu người dùng không tồn tại
         if (!user) {
             const err = customError('UserNotFoundError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err, null);
             throw err;
         }
 
@@ -61,17 +61,17 @@ const verify = async (userId, password, callback) => {
         const result = await bcrypt.compare(password, user.password);
         if (result) {
             // Mật khẩu đúng
-            if (callback) return callback(true, null);
+            if (callback) return callback(null, true);
             return true;
         }
         else {
             // Mật khẩu sai
-            if (callback) return callback(false, null);
+            if (callback) return callback(null, false);
             return false;
         }
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }

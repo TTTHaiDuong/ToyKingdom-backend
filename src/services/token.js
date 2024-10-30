@@ -20,7 +20,7 @@ const generateAndRecord = async (payload, option, callback) => {
 
         if (!data.id || !data.role) {
             const err = customError('MissingVariableError');
-            if (callback) return callback(null, err)
+            if (callback) return callback(err, null)
             throw err;
         }
 
@@ -41,11 +41,11 @@ const generateAndRecord = async (payload, option, callback) => {
         if (tokens.accessToken || tokens.refreshToken)
             await db.LoginToken.upsert({ userId: data.id, ...tokens });
 
-        if (callback) return callback(tokens, null);
+        if (callback) return callback(null, tokens);
         return tokens;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -56,16 +56,16 @@ const generateAndRecord = async (payload, option, callback) => {
  * @param {function(String?, Error?)?} callback (accessToken, error)
  * @returns {Promise<String> | void}
  */
-const getAccessToken = async (refreshToken, callback) => {
+const refreshAccessToken = async (refreshToken, callback) => {
     try {
         const decode = await verify({ refreshToken: refreshToken });
         const { accessToken } = await generateAndRecord(decode, { accessToken: true });
 
-        if (callback) return callback(accessToken, null);
+        if (callback) return callback(null, accessToken);
         return accessToken;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -82,7 +82,7 @@ const verify = async (tokenPair, callback) => {
         const { accessToken, refreshToken } = tokenPair;
         if (!accessToken && !refreshToken) {
             const err = customError('NotProvidedAnyTokenError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err, null);
             throw err;
         }
 
@@ -97,7 +97,7 @@ const verify = async (tokenPair, callback) => {
         // Nếu bản ghi chứa các token không tồn tại
         if (tokenCount === 0) {
             const err = customError('TokenNotFoundError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err, null);
             throw err;
         }
 
@@ -108,11 +108,11 @@ const verify = async (tokenPair, callback) => {
         ]);
 
         // Decode là thân của token, access token và refresh token có thân payload như nhau
-        if (callback) return callback(accessDecode || refreshDecode, null);
+        if (callback) return callback(null, accessDecode || refreshDecode);
         return accessDecode || refreshDecode;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -133,6 +133,6 @@ const verifyJwt = (token, key) => {
 
 export default {
     generateAndRecord,
-    getAccessToken,
+    refreshAccessToken,
     verify
 }

@@ -2,6 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    await this.down(queryInterface, Sequelize);
     await queryInterface.createTable('OTPs', {
       id: {
         allowNull: false,

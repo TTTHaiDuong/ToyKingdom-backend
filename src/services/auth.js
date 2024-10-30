@@ -26,7 +26,7 @@ const login = async ({ email, phone }, password, callback) => {
         // Nếu như người dùng không tồn tại
         if (!user) {
             const err = customError('UserNotFoundError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err, null);
             throw err;
         }
 
@@ -36,7 +36,7 @@ const login = async ({ email, phone }, password, callback) => {
         const result = await passwordServices.verify(payload.id, password);
         if (!result) {
             const err = customError('IncorrectPasswordError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err, null);
             throw err;
         }
 
@@ -44,11 +44,11 @@ const login = async ({ email, phone }, password, callback) => {
         const tokenPair = await token.generateAndRecord(payload, {
             accessToken: true, refreshToken: true
         });
-        if (callback) return callback(tokenPair, null);
+        if (callback) return callback(null, tokenPair);
         return tokenPair;
     }
     catch (err) {
-        if (callback) return callback(null, err);
+        if (callback) return callback(err, null);
         throw err;
     }
 }
@@ -69,7 +69,7 @@ const logout = async (userId, callback) => {
         // Nếu login token chưa được thu hồi
         if (deletedCount === 0) {
             const err = customError('UnrevokedLoginTokenError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err);
             throw err;
         }
 
@@ -91,12 +91,12 @@ const signup = async (email, phone, fullName, password, callback) => {
         await transaction.commit();
 
         created.password = undefined;
-        if (callback) return callback(created, null);
+        if (callback) return callback(null, created);
         return created;
     }
     catch (err) {
         await transaction.rollback();
-        if (callback) return callback(null, err)
+        if (callback) return callback(err, null)
         throw err;
     }
 }
@@ -107,7 +107,7 @@ const changePassword = async (userId, oldPassword, newPassword, callback) => {
 
         if (!verification) {
             const err = customError('IncorrectPasswordError');
-            if (callback) return callback(null, err);
+            if (callback) return callback(err);
             throw err;
         }
 

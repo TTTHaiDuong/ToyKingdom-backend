@@ -19,11 +19,11 @@ const createReview = async (productId, userId, rating, comment, callback) => {
             reviewDate: Date.now()
         }, { raw: true });
 
-        if (callback) callback(review, null);
+        if (callback) callback(null, review);
         else return review;
     }
     catch (err) {
-        if (callback) callback(null, err);
+        if (callback) callback(err, null);
         else throw err;
     }
 }
@@ -74,16 +74,16 @@ const getReviews = async (conditions, page = 1, limit = 10, callback) => {
             where: where,
             group: ['ProductReview.id'],
             order: order,
-            limit: limit,
+            limit: +limit,
             offset: (page - 1) * limit,
             raw: true
         });
 
-        if (callback) callback(reviews, null);
+        if (callback) callback(null, reviews);
         else return reviews;
     }
     catch (err) {
-        if (callback) callback(null, err);
+        if (callback) callback(err, null);
         else throw err;
     }
 }
