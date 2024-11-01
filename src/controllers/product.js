@@ -30,6 +30,7 @@ const findAll = async (req, res) => {
     const exclude = (role !== 'owner' && role !== 'admin') && 'revenue';
 
     productServices.findAll(conditions, exclude, page, limit, (err, products) => {
+        console.log(err);
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ products })
     });

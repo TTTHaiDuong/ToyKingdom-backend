@@ -64,7 +64,6 @@ const changeRole = async (req, res) => {
 }
 
 export default {
-    create,
     findAll,
     findOne,
     update,

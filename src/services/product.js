@@ -225,6 +225,11 @@ const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
                 attributes: ['id', 'url'],
                 required: false,
                 where: { order: 1 }
+            },
+            {
+                model: db.ProductReview,
+                attributes: [],
+                required: false
             }];
 
         exclude = Array.isArray(exclude) ? exclude : (exclude ? [exclude] : []);
@@ -236,7 +241,6 @@ const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
                     ...(!exclude.includes('revenue') ? [[Sequelize.literal(`(SELECT COALESCE(SUM(price * quantity), 0) FROM SoldProducts WHERE SoldProducts.productId = Product.id)`), 'revenue']] : []),
                     ...(!exclude.includes('totalSold') ? [[Sequelize.literal(`(SELECT COALESCE(SUM(quantity), 0) FROM SoldProducts WHERE SoldProducts.productId = Product.id)`), 'totalSold']] : []),
                     ...(!exclude.includes('rating') ? [[Sequelize.literal(`(SELECT COALESCE(ROUND(AVG(rating), 1), 0) FROM ProductReviews WHERE ProductReviews.productId = Product.id)`), 'rating']] : []),
-                    ...(!exclude.includes('totalReviews') ? [[Sequelize.literal('COALESCE(COUNT(ProductReviews.id), 0)'), 'totalReviews']] : []),
                 ],
                 exclude: exclude
             },
