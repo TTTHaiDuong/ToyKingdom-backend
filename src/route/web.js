@@ -30,7 +30,7 @@ const initWebRouters = (app) => {
 const initPublicRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/', (req, res) => { return res.render('home-page.ejs') });
+    router.get('/', async (req, res) => { return res.status(200).json({ message: 'Hello World' }) });
     router.post('/login', authController.login); // Yêu cầu đăng nhập
     router.post('/signup', authController.signup);
     router.post('/access/refresh', authController.refreshAccessToken);

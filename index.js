@@ -41,6 +41,6 @@ initWebRouters(app); // Khởi tạo router
 //connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
 
 // Chạy server
-app.listen(+process.env.PORT, () => {
-    console.log('\x1b[1m\x1b[34m%s\x1b[0m', `Server is running on the port: ${process.env.PORT}`);
-});
+// app.listen(+process.env.PORT, () => {
+//     console.log('\x1b[1m\x1b[34m%s\x1b[0m', `Server is running on the port: ${process.env.PORT}`);
+// });
