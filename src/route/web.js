@@ -16,7 +16,7 @@ const initWebRouters = (app) => {
     // initOwnerRoutes(router);
     initRegisteredRoutes(router);
 
-    app.use('/', router);
+    app.use('/api', router);
     app.use((req, res) => {
         return res.status(404).json({
             path: req.path,
@@ -30,6 +30,7 @@ const initWebRouters = (app) => {
 const initPublicRoutes = (parentRouter) => {
     const router = express.Router();
 
+    router.get('/', (req, res) => { return res.render('home-page.ejs') });
     router.post('/login', authController.login); // Yêu cầu đăng nhập
     router.post('/signup', authController.signup);
     router.post('/access/refresh', authController.refreshAccessToken);

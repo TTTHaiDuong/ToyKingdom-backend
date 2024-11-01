@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import initWebRouters from './route/web';
-import configViewEngine from './config/view-engine';
-import connectDB from './config/db-connection';
+import initWebRouters from './src/route/web';
+import configViewEngine from './src/config/view-engine';
+import connectDB from './src/config/db-connection';
 import session from 'express-session';
 import 'dotenv/config';
 
