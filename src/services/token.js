@@ -1,7 +1,7 @@
+import CustomError from './custom-error';
 import db from '../models/index';
-import jwt from 'jsonwebtoken';
-import customError from './custom-error';
 import 'dotenv/config';
+import jwt from 'jsonwebtoken';
 
 /**
  * Tạo token và ghi lại token trong CSDL
@@ -13,13 +13,14 @@ import 'dotenv/config';
  * (tokenPair, error)
  * @returns {Promise<{accessToken: String?, refreshToken: String?}> | void}
  */
-const generateAndRecord = async (payload, option, callback) => {
+const generateAndRecord = async (payload, option, callback, transaction) => {
     try {
         // Ràng buộc phần thân dữ liệu mà token tải theo
-        const data = { id: payload.id, email: payload.email, phone: payload.phone, role: payload.role };
+        const data = { id: payload.id, role: payload.role };
 
         if (!data.id || !data.role) {
-            const err = customError('MissingVariableError');
+            const err = new CustomError('MissingVariableError',
+                ['devInfo', { variable: 'payload' }]);
             if (callback) return callback(err, null)
             throw err;
         }
@@ -39,7 +40,10 @@ const generateAndRecord = async (payload, option, callback) => {
         }
         // Cập nhật bản ghi có userId bằng với payload.id, nếu không có thì tạo mới
         if (tokens.accessToken || tokens.refreshToken)
-            await db.LoginToken.upsert({ userId: data.id, ...tokens });
+            await db.LoginToken.upsert({
+                userId: data.id,
+                ...tokens
+            }, { transaction: transaction });
 
         if (callback) return callback(null, tokens);
         return tokens;
@@ -81,7 +85,8 @@ const verify = async (tokenPair, callback) => {
     try {
         const { accessToken, refreshToken } = tokenPair;
         if (!accessToken && !refreshToken) {
-            const err = customError('NotProvidedAnyTokenError');
+            const err = new CustomError('NotProvidedAnyTokenError',
+                ['paramInfo', { variable: 'tokenPair' }]);
             if (callback) return callback(err, null);
             throw err;
         }
@@ -96,7 +101,8 @@ const verify = async (tokenPair, callback) => {
 
         // Nếu bản ghi chứa các token không tồn tại
         if (tokenCount === 0) {
-            const err = customError('TokenNotFoundError');
+            const err = new CustomError('TokenNotFoundError',
+                ['paramInfo', { variable: 'tokenPair' }]);
             if (callback) return callback(err, null);
             throw err;
         }

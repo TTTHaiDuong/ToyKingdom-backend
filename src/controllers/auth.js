@@ -2,16 +2,59 @@ import authServices from '../services/auth';
 import passwordServices from '../services/password';
 import tokenServices from '../services/token';
 import sendEmail from '../services/send-email';
+import validator from 'validator';
+
+const validateRegisterInfo = async ({ email, phone }, callback) => {
+    try {
+        if (!email && !phone) {
+            if (callback) return callback(['Missing email or phone']);
+            throw err;
+        }
+
+        const errors = [];
+
+        if (email && !validator.isEmail(email)) errors.push('Invalid email');
+        if (phone && !validator.isMobilePhone(phone, 'any')) errors.push('Invalid phone');
+
+        const existing = await db.User.findOne({
+            where: {
+                ...(email && (uniqueEmail || uniqueEmail === undefined) && { email: email }),
+                ...(phone && (uniquePhone || uniquePhone === undefined) && { phone: phone })
+            }
+        });
+
+        if (existing) {
+            if (email && email === existing.email) errors.push('Existing email');
+            if (phone && phone === existing.phone) errors.push('Existing phone');
+        }
+
+        const result = errors.length !== 0 ? errors : null;
+        if (callback) return callback(null, result);
+        return result;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
+        throw err;
+    }
+}
 
 const login = async (req, res) => {
     const { email, phone, password } = req.body;
 
-    if (!email && !phone) return res.status(401).json({ message: 'Missing email or phone' });
-    if (!password) return res.status(401).json({ message: 'Missing password' });
+    if (!email && !phone) return res.status(400).json({ message: 'Missing email or phone' });
+    if (!password) return res.status(400).json({ message: 'Missing password' });
 
     authServices.login({ email, phone }, password, (err, tokenPair) => {
-        if (err) return res.status(400).json({ message: 'Failed login' });
-        return res.status(200).json({ ...tokenPair, message: 'Ok' });
+        if (err) {
+            if (err instanceof CustomError && err.paramInfo.variable === 'emailOrPhone')
+                return res.status(404).json({ message: `Not existing ${email ? 'email' : 'phone'}` });
+
+            if (err instanceof CustomError && err.paramInfo.variable === 'password')
+                return res.status(401).json({ message: 'Incorrect password' });
+
+            return res.status(500).json({ message: 'Server error' });
+        }
+        return res.status(200).json({ ...tokenPair });
     });
 }
 
@@ -24,13 +67,20 @@ const logout = async (req, res) => {
     });
 }
 
-// Lấy những phần signup model lên
 const signup = async (req, res) => {
     const { email, phone, fullName, password } = req.body;
 
+    const invalid = await validateRegisterInfo({ email, phone });
+    if (invalid) return res.status(400).json({ invalidStack: invalid, message: 'Invalid email or phone' });
+
     authServices.signup(email, phone, fullName, password, (err, user) => {
-        if (err) return res.status(500).json({ message: 'Server error' });
-        return res.status(200).json({ user: user, message: 'Ok' })
+        if (err) {
+            if (err instanceof CustomError && err.paramInfo.variable === 'password')
+                return res.status(400).json({ message: 'Missing password' });
+
+            return res.status(500).json({ message: 'Server error' });
+        }
+        return res.status(200).json({ created: user })
     });
 }
 
@@ -38,25 +88,35 @@ const changePassword = async (req, res) => {
     const { id } = req.tokenPayload;
     const { oldPassword, newPassword } = req.body;
 
-    const isVerified = await passwordServices.verify(id, oldPassword, (err, result) => {
-        if (err || !result) return false; return true;
-    });
-
-    if (!isVerified) return res.status(401).json({ message: 'Incorrect password' });
+    const isVerified = await passwordServices.verify(id, oldPassword);
+    if (!isVerified) return res.status(401).json({ message: 'Incorrect old password' });
 
     passwordServices.generate(id, newPassword, (err) => {
-        if (err) return res.status(500).json({ message: 'Server error' });
+        if (err) {
+            if (err instanceof CustomError && err.paramInfo.variable === 'password')
+                return res.status(400).json({ message: 'Missing new password' });
+
+            return res.status(500).json({ message: 'Server error' });
+        }
         return res.status(200).json({ message: 'Ok' })
     });
 }
 
 const refreshAccessToken = async (req, res) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers['x-refresh-token'];
     const refreshToken = authHeader && authHeader.split(' ')[1];
 
     tokenServices.refreshAccessToken(refreshToken, (err, accessToken) => {
-        if (err) return res.status(500).json({ message: 'Server error' });
-        return res.status(200).json({ accessToken: accessToken, message: 'Ok' })
+        if (err) {
+            if (err instanceof CustomError && err.paramInfo.variable === 'tokenPair')
+                return res.status(400).json({ message: 'Missing refresh token' });
+
+            if (err instanceof CustomError && err.name === 'TokenNotFoundError' && err.paramInfo.variable === 'tokenPair')
+                return res.status(404).json({ message: 'Invalid refresh token' });
+
+            return res.status(500).json({ message: 'Server error' });
+        }
+        return res.status(200).json({ accessToken })
     });
 }
 
@@ -69,6 +129,7 @@ let requestOtpVieEmail = async (req, res) => {
 }
 
 export default {
+    validateRegisterInfo,
     login,
     logout,
     signup,

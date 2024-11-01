@@ -1,7 +1,5 @@
-import { Sequelize, Op } from 'sequelize';
 import db from '../models/index';
-import validator from 'validator';
-import customError from '../services/custom-error';
+import { Sequelize, Op } from 'sequelize';
 
 /**
  * 
@@ -9,22 +7,13 @@ import customError from '../services/custom-error';
  * @param {{email: String?, 
 * phone: String?, fullName: String?, 
 * role: String?, createdAt: Date?, 
-* updatedAt: Date?}} changes
+* updatedAt: Date?}} attributes
 * 
 * @param {function(Error?)?} callback (error)  
 */
-const upsert = async (id, changes, transaction, callback) => {
+const upsert = async (id, attributes, callback, transaction) => {
     try {
-        const { email, phone, fullName, role } = changes;
-
-        const check = await validateRegisterInfo({ email, phone });
-
-        if (check) {
-            const err = customError('InvalidRegisterInfoError');
-            err.stack = check;
-            if (callback) return callback(err, null);
-            throw err;
-        }
+        const { email, phone, fullName, role } = attributes;
 
         const data = {
             ...(email && { email: email }),
@@ -45,37 +34,6 @@ const upsert = async (id, changes, transaction, callback) => {
             if (callback) return callback(null, user);
             return user;
         }
-    }
-    catch (err) {
-        if (callback) return callback(err, null);
-        throw err;
-    }
-}
-
-const validateRegisterInfo = async ({ email, phone }, option, callback) => {
-    try {
-        const { uniqueEmail, uniquePhone } = option || {};
-
-        const errors = [];
-
-        if (email && !validator.isEmail(email)) errors.push('Invalid email');
-        if (phone && !validator.isMobilePhone(phone, 'any')) errors.push('Invalid phone');
-
-        const existing = await db.User.findOne({
-            where: {
-                ...(email && (uniqueEmail || uniqueEmail === undefined) && { email: email }),
-                ...(phone && (uniquePhone || uniquePhone === undefined) && { phone: phone })
-            }
-        });
-
-        if (existing) {
-            if (email && email === existing.email) errors.push('Existing email');
-            if (phone && phone === existing.phone) errors.push('Existing phone');
-        }
-
-        const result = errors.length !== 0 ? errors : null;
-        if (callback) return callback(null, result);
-        return result;
     }
     catch (err) {
         if (callback) return callback(err, null);
@@ -169,7 +127,7 @@ const findAll = async (conditions, page = 1, limit = 10, callback) => {
  * @param {function(Error?)} callback
  * @returns {Promise<void> | void} 
  */
-const destroy = async (ids, transaction, callback) => {
+const destroy = async (ids, callback, transaction) => {
     try {
         const deleted = await db.User.destroy({
             where: { id: ids }

@@ -1,4 +1,5 @@
 import userServices from '../services/user';
+import { userRoles } from '../middlewares/passport';
 
 const findOne = async (req, res) => {
     const userId = req.tokenPayload.id;
@@ -13,7 +14,7 @@ const findOne = async (req, res) => {
         if (user.role === 'owner' && role === 'admin' || user.role === 'admin' && user.id != userId)
             return res.status(401).json({ message: 'Access denied' });
 
-        return res.status(200).json({ user: user, message: 'Ok' });
+        return res.status(200).json({ user });
     });
 }
 
@@ -23,44 +24,50 @@ const findAll = (req, res) => {
 
     userServices.findAll(conditions, page, limit, (err, users) => {
         if (err) return res.status(500).json({ message: 'Server error' });
-        return res.status(200).json({ users: users, message: 'Ok' })
+        return res.status(200).json({ users })
     });
 }
 
 const update = async (req, res) => {
-    const accessToken = req.params.accessToken;
-    const { email, phone, fullName, createdAt, updatedAt } = req.body;
+    const { id, attributes } = req.body;
+    const { role } = req.tokenPayload;
 
-    if (accessToken) {
-        const decode = await tokenServices.verifyToken({ accessToken: accessToken });
+    const invalid = await validateRegisterInfo({ email: attributes.email, phone: attributes.phone });
+    if (invalid) return res.status(400).json({ invalidStack: invalid, message: 'Invalid email or phone' });
+    if (!id) return res.status(400).json({ message: 'Missing id' });
 
-        updateUser(decode.id, { email, phone, fullName, createdAt, updatedAt }, (err) => {
-            if (err) {
-                if (err.name == 'InvalidEmailFormatError') return res.status(401).json({ message: 'Invalid email format' });
-                if (err.name == 'InvalidPhoneNumberFormatError') return res.status(401).json({ message: 'Invalid phone number format' });
-                if (err.name == 'NoUserUpdatedError') return res.status(401).json({ message: 'No user updated' });
-                return res.status(500).json({ message: 'Server error' });
-            }
-            else return res.status(200).json({ message: 'Ok' });
-        });
-    }
-    else {
-        return res.status(401).json({ message: 'No permission' });
-    }
+    userServices.upsert(id, attributes, async (err, user) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ updated: user })
+    });
 }
 
 const destroy = async (req, res) => {
+    const { ids } = req.body;
 
+    userServices.destroy(ids, (err, deleted) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ deleted: deleted });
+    });
 }
 
 const changeRole = async (req, res) => {
     const { id, role } = req.body;
 
+    if (userRoles[role] === undefined || role === 'registered')
+        return res.status(400).json({ message: 'Invalid role' });
+
+    userServices.upsert(id, { role }, (err, updated) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ message: 'Ok' });
+    });
 }
 
 export default {
+    create,
     findAll,
     findOne,
     update,
-    destroy
+    destroy,
+    changeRole
 }

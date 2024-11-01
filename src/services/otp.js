@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import customError from './custom-error';
+import CustomError from './custom-error';
 import db from '../models';
 
 /**
@@ -35,7 +35,7 @@ const generateOtpSession = async (sendAddress, otpCode, callback) => {
         });
 
         if (existingRecord) {
-            const err = customError('ExistingOTPError');
+            const err = new CustomError('ExistingOTPError');
             if (callback) { callback(err); return; }
             else throw err;
         }
@@ -78,7 +78,7 @@ const verifyOtp = async (sendAddress, otpCode, callback) => {
         callback(null);
     }
     else {
-        callback(customError('InvalidOTPError'));
+        callback(new CustomError('InvalidOTPError'));
     }
 }
 

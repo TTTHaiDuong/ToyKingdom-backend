@@ -1,18 +1,19 @@
-import db from '../models/index';
-import customError from './custom-error';
 import bcrypt from 'bcryptjs';
+import db from '../models/index';
+import CustomError from './custom-error';
 
 /**
- * Tạo mật khẩu mới cho người dùng
- * @param {Number} userId thông tin người dùng
- * @param {String} password mật khẩu chưa băm 
- * @param {function(Error?)?} callback (error)
- * @returns {Promise<void> | void}
+ * 
+ * @param {Number} userId mã người dùng
+ * @param {String} password mật khẩu
+ * @param {function(Error?)?} callback 
+ * @returns {Promise<void>}
  */
-const generate = async (userId, password, callback) => {
+const generate = async (userId, password, callback, transaction) => {
     try {
         if (!password || password === '') {
-            const err = customError('EmptyPasswordError');
+            const err = new CustomError('EmptyPasswordError',
+                ['paramInfo', { variable: 'password' }]);
             if (callback) return callback(err);
             throw err;
         }
@@ -23,11 +24,15 @@ const generate = async (userId, password, callback) => {
         // Cập nhật vào bản ghi
         const [updatedCount] = await db.User.update({
             password: hashedPass
-        }, { where: { id: userId } });
+        }, {
+            where: { id: userId },
+            transaction: transaction
+        });
 
         // Nếu không có bản ghi nào được cập nhật
         if (updatedCount == 0) {
-            const err = customError('NoPasswordUpdatedError');
+            const err = new CustomError('NoPasswordUpdatedError',
+                ['paramInfo', { variable: 'userId' }]);
             if (callback) return callback(err);
             throw err;
         }
@@ -52,7 +57,8 @@ const verify = async (userId, password, callback) => {
 
         // Nếu người dùng không tồn tại
         if (!user) {
-            const err = customError('UserNotFoundError');
+            const err = new CustomError('UserNotFoundError',
+                ['paramInfo', { variable: 'userId' }]);
             if (callback) return callback(err, null);
             throw err;
         }

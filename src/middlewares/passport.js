@@ -1,4 +1,4 @@
-import token from '../services/token';
+import tokenServices from '../services/token';
 
 /** Danh sách quyền của các vai trò */
 const userRoles = {
@@ -18,7 +18,7 @@ const checkRole = (role) => async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const accessToken = authHeader && authHeader.split(' ')[1];
 
-    token.verify({ accessToken: accessToken }, (err, decode) => {
+    tokenServices.verify({ accessToken: accessToken }, (err, decode) => {
         if (err || !decode) return res.status(401).json({ message: 'Unauthorized' });
 
         if (!userRoles[role]?.includes(decode.role))
@@ -34,5 +34,5 @@ export default {
     checkAdmin: checkRole('admin'),
     checkOwner: checkRole('owner'),
     checkRegistered: checkRole('registered'),
-    userRoles: userRoles
+    userRoles
 }

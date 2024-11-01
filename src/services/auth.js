@@ -1,9 +1,9 @@
+import CustomError from './custom-error';
 import db from '../models/index';
-import customError from './custom-error';
 import 'dotenv/config';
-import token from './token';
 import passwordServices from './password';
-import user from './user';
+import tokenServices from './token';
+import userServices from './user';
 
 /**
  * Đăng nhập bằng email hoặc số điện thoại và mật khẩu
@@ -12,38 +12,43 @@ import user from './user';
  * @param {function({accessToken: String, refreshToken: String}?, Error?)?} callback (tokenPair, error)
  * @return {Promise<{accessToken: String, refreshToken: String}> | void}
  */
-const login = async ({ email, phone }, password, callback) => {
+const login = async (emailOrPhone, password, callback) => {
     try {
+        const { email, phone } = emailOrPhone;
+
         // Tìm người dùng phù hợp với email hoặc số điện thoại trong CSDL
         const user = await db.User.findOne({
             where: {
-                ...(email && { email: email }),
-                ...(phone && { phone: phone })
+                ...(email && { email }),
+                ...(phone && { phone })
             },
             raw: true
         });
 
         // Nếu như người dùng không tồn tại
         if (!user) {
-            const err = customError('UserNotFoundError');
+            const err = new CustomError('UserNotFoundError',
+                ['paramInfo', { variable: 'emailOrPhone' }]);
             if (callback) return callback(err, null);
             throw err;
         }
 
         // Kiểm tra mật khẩu
-        const payload = { id: user.id, email: user.email, phone: user.phone, role: user.role };
+        const payload = { id: user.id, role: user.role };
 
         const result = await passwordServices.verify(payload.id, password);
         if (!result) {
-            const err = customError('IncorrectPasswordError');
+            const err = new CustomError('IncorrectPasswordError',
+                ['paramInfo', { variable: 'password' }]);
             if (callback) return callback(err, null);
             throw err;
         }
 
         // Tạo cặp token ghi vào CSDL
-        const tokenPair = await token.generateAndRecord(payload, {
+        const tokenPair = await tokenServices.generateAndRecord(payload, {
             accessToken: true, refreshToken: true
         });
+
         if (callback) return callback(null, tokenPair);
         return tokenPair;
     }
@@ -63,18 +68,18 @@ const logout = async (userId, callback) => {
     try {
         // Xoá bản ghi chứa access token hoặc refresh token
         const deletedCount = await db.LoginToken.destroy({
-            where: { userId: userId }
+            where: { userId }
         });
 
         // Nếu login token chưa được thu hồi
         if (deletedCount === 0) {
-            const err = customError('UnrevokedLoginTokenError');
+            const err = new CustomError('UnrevokedLoginTokenError',
+                ['paramInfo', { variable: 'userId' }]);
             if (callback) return callback(err);
             throw err;
         }
 
         if (callback) return callback(null);
-        return null;
     }
     catch (err) {
         if (callback) return callback(err);
@@ -85,8 +90,8 @@ const logout = async (userId, callback) => {
 const signup = async (email, phone, fullName, password, callback) => {
     const transaction = await db.sequelize.transaction();
     try {
-        const created = await user.upsert(null, { email, phone, fullName, role: 'user' });
-        await passwordServices.generate(created.id, password);
+        const created = await userServices.upsert(null, { email, phone, fullName, role: 'user' }, null, transaction);
+        await passwordServices.generate(created.id, password, null, transaction);
 
         await transaction.commit();
 
@@ -106,7 +111,8 @@ const changePassword = async (userId, oldPassword, newPassword, callback) => {
         const verification = await password.verify(userId, oldPassword);
 
         if (!verification) {
-            const err = customError('IncorrectPasswordError');
+            const err = new CustomError('IncorrectPasswordError',
+                ['paramInfo', { variable: 'oldPassword' }]);
             if (callback) return callback(err);
             throw err;
         }

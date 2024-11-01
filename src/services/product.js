@@ -1,7 +1,7 @@
 import db from '../models/index';
 import { Sequelize, Op } from 'sequelize';
 
-const upsert = async (id, attributes, transaction, callback) => {
+const upsert = async (id, attributes, callback, transaction) => {
     try {
         const { name, description, price, brand, suitableAge, tag, stock, isSale, discount, discountStart, discountEnd } = attributes;
 
@@ -28,12 +28,19 @@ const upsert = async (id, attributes, transaction, callback) => {
         const include = [db.InventoryProduct, db.Discount];
 
         if (id) {
-            const [updatedCount] = await db.Product.update(data, { where: { id: id }, include: include, transaction: transaction });
+            const [updatedCount] = await db.Product.update(data, {
+                where: { id: id },
+                include: include,
+                transaction: transaction
+            });
             if (callback) return callback(null, updatedCount);
             return updatedCount;
         }
         else {
-            const product = await db.Product.create(data, { include: include, transaction: transaction });
+            const product = await db.Product.create(data, {
+                include: include,
+                transaction: transaction
+            });
             if (callback) return callback(null, product);
             return product;
         }
@@ -100,6 +107,7 @@ const findOne = async (id, exclude, callback) => {
                     ...(!exclude.includes('revenue') ? [[Sequelize.literal('COALESCE(SUM(SoldProducts.price * SoldProducts.quantity), 0)'), 'revenue']] : []),
                     ...(!exclude.includes('totalSold') ? [[Sequelize.literal('COALESCE(SUM(SoldProducts.quantity), 0)'), 'totalSold']] : []),
                     ...(!exclude.includes('rating') ? [[Sequelize.literal('COALESCE(ROUND(AVG(ProductReviews.rating)), 0)'), 'rating']] : []),
+                    ...(!exclude.includes('totalReviews') ? [[Sequelize.literal('COALESCE(COUNT(ProductReviews.id), 0)'), 'totalReviews']] : []),
                 ],
                 exclude: exclude
             },
@@ -135,7 +143,7 @@ const findOne = async (id, exclude, callback) => {
 const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
     try {
         const { id, name, price, brand, suitableAge, tag, createdAt, updatedAt, stock, isSale,
-            discount, revenue, totalSold, rating, categories, order } = conditions || {};
+            discount, revenue, totalSold, rating, totalReviews, categories, order } = conditions || {};
 
         const where = {
             ...(id && (Array.isArray(id) ? (typeof id[1] === 'string' ? { id: { [Op[id[1]]]: id[0] } }
@@ -177,6 +185,9 @@ const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
 
             ...(rating && (Array.isArray(rating) ? (typeof rating[1] === 'string' ? { rating: { [Op[rating[1]]]: rating[0] } }
                 : { rating: { [Op.between]: [rating[0], rating[1]] } }) : { rating: rating })),
+
+            ...(totalReviews && (Array.isArray(totalReviews) ? (typeof totalReviews[1] === 'string' ? { totalReviews: { [Op[totalReviews[1]]]: totalReviews[0] } }
+                : { totalReviews: { [Op.between]: [totalReviews[0], totalReviews[1]] } }) : { totalReviews: totalReviews })),
         };
 
         const include = [
@@ -224,7 +235,8 @@ const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
                 include: [
                     ...(!exclude.includes('revenue') ? [[Sequelize.literal(`(SELECT COALESCE(SUM(price * quantity), 0) FROM SoldProducts WHERE SoldProducts.productId = Product.id)`), 'revenue']] : []),
                     ...(!exclude.includes('totalSold') ? [[Sequelize.literal(`(SELECT COALESCE(SUM(quantity), 0) FROM SoldProducts WHERE SoldProducts.productId = Product.id)`), 'totalSold']] : []),
-                    ...(!exclude.includes('rating') ? [[Sequelize.literal(`(SELECT COALESCE(ROUND(AVG(rating), 1), 0) FROM ProductReviews WHERE ProductReviews.productId = Product.id)`), 'rating']] : [])
+                    ...(!exclude.includes('rating') ? [[Sequelize.literal(`(SELECT COALESCE(ROUND(AVG(rating), 1), 0) FROM ProductReviews WHERE ProductReviews.productId = Product.id)`), 'rating']] : []),
+                    ...(!exclude.includes('totalReviews') ? [[Sequelize.literal('COALESCE(COUNT(ProductReviews.id), 0)'), 'totalReviews']] : []),
                 ],
                 exclude: exclude
             },
@@ -252,7 +264,7 @@ const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
  * @param {function(Error?)} callback (error)
  * @returns {Promise<void> | void} 
  */
-const destroy = async (ids, transaction, callback) => {
+const destroy = async (ids, callback, transaction) => {
     try {
         const deleted = await db.Product.destroy({
             where: { id: ids }

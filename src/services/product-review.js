@@ -1,5 +1,5 @@
 import db from '../models/index';
-import customError from './custom-error';
+import CustomError from './custom-error';
 
 /**
  * Tạo một đánh giá sản phẩm
@@ -9,7 +9,7 @@ import customError from './custom-error';
  * @param {function(ProductReview?, Error?)?} callback (review, error)
  * @return {Promise<ProductReview> | void}
  */
-const createReview = async (productId, userId, rating, comment, callback) => {
+const upsert = async (productId, userId, rating, comment, callback) => {
     try {
         const review = await db.ProductReview.create({
             productId: productId,
@@ -28,6 +28,10 @@ const createReview = async (productId, userId, rating, comment, callback) => {
     }
 }
 
+const findOne = async () => {
+
+}
+
 /**
  * Lấy đánh giá sản phẩm
  * @param {{id: Number | [Number, Boolean], productId: Number | [Number, Boolean],
@@ -39,7 +43,7 @@ const createReview = async (productId, userId, rating, comment, callback) => {
  * @param {function([ProductReview]?, Error?)?} callback (reviews, error)
  * @return {Promise<[ProductReview]> | void} 
  */
-const getReviews = async (conditions, page = 1, limit = 10, callback) => {
+const findAll = async (conditions, page = 1, limit = 10, callback) => {
     try {
         let { id, productId, userId, rating, comment, reviewDate, createdAt, updatedAt, order } = conditions;
         order = order || [['id', 'ASC']];
@@ -94,14 +98,14 @@ const getReviews = async (conditions, page = 1, limit = 10, callback) => {
  * @param {function(Error?)?} callback (error)
  * @return {Promise<void> | void}
  */
-const deleteReview = async (id, callback) => {
+const destroy = async (id, callback) => {
     try {
         const [deleted] = await db.ProductReview.destroy({
             where: { id: id }
         });
 
         if (deleted == 0) {
-            const err = customError('NoReviewDeletedError');
+            const err = new CustomError('NoReviewDeletedError');
             if (callback) callback(err);
             else throw err;
         }
@@ -113,7 +117,8 @@ const deleteReview = async (id, callback) => {
 }
 
 export default {
-    createReview,
-    getReviews,
-    deleteReview
+    upsert,
+    findOne,
+    findAll,
+    destroy
 }
