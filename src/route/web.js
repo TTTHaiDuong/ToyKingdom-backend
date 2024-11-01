@@ -16,7 +16,7 @@ const initWebRouters = (app) => {
     // initOwnerRoutes(router);
     initRegisteredRoutes(router);
 
-    app.use('/api', router);
+    app.use('/', router);
     app.use((req, res) => {
         return res.status(404).json({
             path: req.path,
