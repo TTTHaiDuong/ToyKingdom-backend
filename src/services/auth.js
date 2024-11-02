@@ -10,7 +10,7 @@ import userServices from './user';
  * @param {{email: String?, phone: String?}} emailOrPhone email, số điện thoại của người dùng
  * @param {String} password mật khẩu
  * @param {function({accessToken: String, refreshToken: String}?, Error?)?} callback (tokenPair, error)
- * @return {Promise<{accessToken: String, refreshToken: String}> | void}
+ * @return {Promise<{accessToken: String, refreshToken: String}>}
  */
 const login = async (emailOrPhone, password, callback) => {
     try {

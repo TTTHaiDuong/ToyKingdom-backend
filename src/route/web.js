@@ -62,8 +62,8 @@ const initAdminRoutes = (parentRouter) => {
     // router.delete('/user/delete', productController.getOneProduct_Admin);
 
     router.post('/product/create', productController.create);
-    router.get('/product/findAll', productController.findAll);
     router.get('/product/findOne', productController.findOne);
+    router.get('/product/findAll', productController.findAll);
     router.put('/product/update', productController.update);
     router.delete('/product/delete', productController.destroy);
 
