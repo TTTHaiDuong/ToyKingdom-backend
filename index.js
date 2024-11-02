@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import initWebRouters from './src/route/web';
 import configViewEngine from './src/config/view-engine';
-import connectDB from './src/config/db-connection';
 import session from 'express-session';
 import 'dotenv/config';
 
@@ -42,5 +41,5 @@ initWebRouters(app); // Khởi tạo router
 
 // Chạy server
 app.listen(+process.env.PORT, () => {
-    console.log('\x1b[1m\x1b[34m%s\x1b[0m', `Server is running on the port: ${process.env.PORT}`);
+    console.log('\x1b[1m\x1b[34m%s\x1b[0m', `Server is running on http://localhost:${process.env.PORT}`);
 });
