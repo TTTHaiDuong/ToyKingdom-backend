@@ -1,5 +1,5 @@
-import userServices from '../services/user';
-import { userRoles } from '../middlewares/passport';
+import userServices from '../services/user.js';
+import passport from '../middlewares/passport.js';
 
 const findOne = async (req, res) => {
     const userId = req.tokenPayload.id;
@@ -54,7 +54,7 @@ const destroy = async (req, res) => {
 const changeRole = async (req, res) => {
     const { id, role } = req.body;
 
-    if (userRoles[role] === undefined || role === 'registered')
+    if (passport.userRoles[role] === undefined || role === 'registered')
         return res.status(400).json({ message: 'Invalid role' });
 
     userServices.upsert(id, { role }, (err, updated) => {

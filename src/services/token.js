@@ -1,5 +1,5 @@
-import CustomError from './custom-error';
-import db from '../models/index';
+import CustomError from './custom-error.js';
+import db from '../models/index.js';
 import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 

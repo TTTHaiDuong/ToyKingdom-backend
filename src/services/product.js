@@ -1,4 +1,4 @@
-import db from '../models/index';
+import db from '../models/index.js';
 import { Sequelize, Op } from 'sequelize';
 
 const upsert = async (id, attributes, callback, transaction) => {

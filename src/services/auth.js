@@ -1,9 +1,9 @@
-import CustomError from './custom-error';
-import db from '../models/index';
+import CustomError from './custom-error.js';
+import db from '../models/index.js';
 import 'dotenv/config';
-import passwordServices from './password';
-import tokenServices from './token';
-import userServices from './user';
+import passwordServices from './password.js';
+import tokenServices from './token.js';
+import userServices from './user.js';
 
 /**
  * Đăng nhập bằng email hoặc số điện thoại và mật khẩu

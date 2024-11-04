@@ -1,7 +1,7 @@
-import authServices from '../services/auth';
-import passwordServices from '../services/password';
-import tokenServices from '../services/token';
-import sendEmail from '../services/send-email';
+import authServices from '../services/auth.js';
+import passwordServices from '../services/password.js';
+import tokenServices from '../services/token.js';
+import sendEmail from '../services/send-email.js';
 import validator from 'validator';
 
 const validateRegisterInfo = async ({ email, phone }, callback) => {

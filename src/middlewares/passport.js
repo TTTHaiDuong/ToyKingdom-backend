@@ -1,4 +1,4 @@
-import tokenServices from '../services/token';
+import tokenServices from '../services/token.js';
 
 /** Danh sách quyền của các vai trò */
 const userRoles = {
@@ -34,5 +34,5 @@ export default {
     checkAdmin: checkRole('admin'),
     checkOwner: checkRole('owner'),
     checkRegistered: checkRole('registered'),
-    userRoles
+    userRoles: userRoles
 }

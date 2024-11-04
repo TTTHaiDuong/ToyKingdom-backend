@@ -1,4 +1,4 @@
-import productServices from '../services/product';
+import productServices from '../services/product.js';
 
 const create = async (req, res) => {
     const { attributes } = req.body;

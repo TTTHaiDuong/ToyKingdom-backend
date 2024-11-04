@@ -1,8 +1,8 @@
 import express from 'express';
-import authController from '../controllers/auth';
-import userController from '../controllers/user';
-import productController from '../controllers/product';
-import passport from '../middlewares/passport';
+import authController from '../controllers/auth.js';
+import userController from '../controllers/user.js';
+import productController from '../controllers/product.js';
+import passport from '../middlewares/passport.js';
 
 const router = express.Router();
 

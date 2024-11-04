@@ -1,4 +1,4 @@
-import db from '../models/index';
+import db from '../models/index.js';
 
 const add = async (userId, productId, quantity, price, callback) => {
     const transaction = await db.sequelize.transaction();

@@ -1,5 +1,5 @@
-import db from '../models/index';
-import CustomError from './custom-error';
+import db from '../models/index.js';
+import CustomError from './custom-error.js';
 
 /**
  * Tạo một đánh giá sản phẩm
