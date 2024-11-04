@@ -5,18 +5,18 @@ import { Sequelize, Op } from 'sequelize';
  * 
  * @param {Number} id mã người dùng
  * @param {{email: String?, 
-* phone: String?, fullName: String?, 
-* role: String?, createdAt: Date?, 
-* updatedAt: Date?}} attributes
-* 
-* @param {function(Error?)?} callback (error)  
-*/
+ * phone: String?, fullName: String?, 
+ * role: String?, createdAt: Date?, 
+ * updatedAt: Date?}} attributes
+ * 
+ * @param {function(Error?)?} callback (error)  
+ */
 const add = async (names, callback, transaction) => {
     try {
         const categories = Array.isArray(names) ? names.map(name => ({ name })) : [{ names }];
 
         await db.Category.bulkCreate(categories, {
-            where: { id: id }, transaction: transaction
+            transaction: transaction
         });
         if (callback) return callback(null);
     }
@@ -38,7 +38,7 @@ const add = async (names, callback, transaction) => {
  * @param {Number} page số trang
  * @param {Number} limit số lượng bản ghi tối đa trả về
  * @param {function([]?, Error?)?} callback (userInfosList, error)
-* @returns {Promise<[]> | void}
+ * @returns {Promise<[]> | void}
  */
 const findAll = async (conditions, page = 1, limit = 10, callback) => {
     try {
@@ -79,7 +79,10 @@ const findAll = async (conditions, page = 1, limit = 10, callback) => {
 const remove = async (idsOrNames, callback, transaction) => {
     try {
         const deleted = await db.User.destroy({
-            where: { id: ids }
+            where: {
+                ...(Array.isArray(idsOrNames) ? (typeof idsOrNames[0] === 'number' ? { id: idsOrNames } : { name: idsOrNames })
+                    : (typeof idsOrNames === 'number' ? { id: idsOrNames } : { name: idsOrNames }))
+            }
         }, { transaction: transaction });
 
         if (callback) return callback(null, deleted);
@@ -92,7 +95,7 @@ const remove = async (idsOrNames, callback, transaction) => {
 }
 
 export default {
-    add,
+    add: create,
     findAll,
     remove
 }

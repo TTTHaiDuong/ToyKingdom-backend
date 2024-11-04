@@ -3,7 +3,7 @@
 module.exports = {
     up: async (queryInterface, Sequelize) => {
         await this.down(queryInterface, Sequelize);
-        await queryInterface.createTable('SoldProducts', {
+        await queryInterface.createTable('Carts', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -17,19 +17,20 @@ module.exports = {
             userId: {
                 type: Sequelize.INTEGER
             },
+            /**Tổng giá tiền */
             price: {
                 type: Sequelize.INTEGER
             },
             quantity: {
                 type: Sequelize.INTEGER
             },
-            saleDate: {
+            addDate: {
                 type: Sequelize.DATE
             }
         }, { timestamps: false });
     },
 
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('SoldProducts');
+        await queryInterface.dropTable('Carts');
     }
 }
