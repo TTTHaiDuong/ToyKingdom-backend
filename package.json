@@ -37,5 +37,8 @@
     "@babel/preset-env": "^7.25.4",
     "nodemon": "^3.1.7",
     "sequelize-cli": "^6.6.2"
+  },
+  "optionalDependencies": {
+    "mysql2": "^x.x.x"
   }
 }
