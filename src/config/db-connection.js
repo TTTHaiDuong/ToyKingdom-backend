@@ -3,7 +3,8 @@ import { exec } from 'child_process'
 import 'dotenv/config'
 
 const sequelize = new Sequelize(process.env.DB_CONNECTION_DATABASE_NAME, 'root', null, {
-  host: 'localhost',
+  host: '127.0.0.1',
+  port: process.env.MYSQL_PORT,
   dialect: 'mysql',
 });
 

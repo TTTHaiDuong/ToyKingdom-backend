@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      productId: {
+        type: Sequelize.INTEGER
+      },
       /**Phần trăm giảm giá */
       percentage: {
         type: Sequelize.TINYINT

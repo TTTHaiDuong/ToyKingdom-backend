@@ -95,7 +95,7 @@ const remove = async (idsOrNames, callback, transaction) => {
 }
 
 export default {
-    add: create,
+    add,
     findAll,
     remove
 }
