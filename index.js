@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true })); // Cấu hình xử lý dữ li
 // configViewEngine(app); // Cấu hình view engine
 initWebRouters(app); // Khởi tạo router
 
-// connectDB.testConnection(); // Test connection
+connectDB.testConnection(); // Test connection
 //connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
 
 // Chạy server

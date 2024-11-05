@@ -8,7 +8,7 @@ const sequelize = new Sequelize(process.env.DB_CONNECTION_DATABASE_NAME, 'root',
 });
 
 /**Thử kết nối đến cơ sở dữ liệu */
-const testConnection = async () => {
+const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log('Connection has been established successfully!');
@@ -51,6 +51,6 @@ const startMySqlServer = () => {
 }
 
 export default {
-  testConnection,
+  testConnection: connectDB,
   startMySqlServer
 }

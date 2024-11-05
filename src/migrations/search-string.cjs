@@ -2,7 +2,6 @@
 
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await this.down(queryInterface, Sequelize);
         await queryInterface.sequelize.query(`
             CREATE FUNCTION search_string(att VARCHAR(255), input VARCHAR(255))
             RETURNS BOOLEAN

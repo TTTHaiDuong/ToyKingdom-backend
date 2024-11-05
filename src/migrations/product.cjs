@@ -2,28 +2,39 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await this.down(queryInterface, Sequelize);
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('Products', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      email: {
+      /**Tên sản phẩm */
+      name: {
         type: Sequelize.STRING
       },
-      phone: {
+      /**Mã giảm giá */
+      discountId: {
+        type: Sequelize.INTEGER
+      },
+      /**Giá gốc */
+      price: {
+        type: Sequelize.INTEGER
+      },
+      /**Mô tả sản phẩm */
+      description: {
+        type: Sequelize.TEXT
+      },
+      /**Hãng sản xuất */
+      brand: {
         type: Sequelize.STRING
       },
-      password: {
-        type: Sequelize.STRING
+      /**Độ tuổi phù hợp */
+      suitableAge: {
+        type: Sequelize.TINYINT
       },
-      /**Họ và tên của người dùng */
-      fullName: {
-        type: Sequelize.STRING
-      },
-      role: {
+      /**Nhãn cho sản phẩm (mới, hot,...) */
+      tag: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -38,6 +49,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('Products');
   }
 }

@@ -6,7 +6,6 @@ const term2 = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await this.down(queryInterface, Sequelize);
         await queryInterface.sequelize.query('ALTER TABLE Discounts AUTO_INCREMENT = 1');
 
         return queryInterface.bulkInsert('Discounts', [

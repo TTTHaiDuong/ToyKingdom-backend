@@ -2,22 +2,25 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await this.down(queryInterface, Sequelize);
-    await queryInterface.createTable('Categories', {
+    await queryInterface.createTable('ProductCategories', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      /**Tên của danh mục sản phẩm */
-      name: {
-        type: Sequelize.STRING
+      /**Mã sản phẩm */
+      productId: {
+        type: Sequelize.INTEGER,
+      },
+      /**Mã danh mục */
+      categoryId: {
+        type: Sequelize.INTEGER,
       }
     }, { timestamps: false });
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Categories');
+    await queryInterface.dropTable('ProductCategories');
   }
 }

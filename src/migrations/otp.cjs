@@ -2,24 +2,20 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await this.down(queryInterface, Sequelize);
-    await queryInterface.createTable('LoginTokens', {
+    await queryInterface.createTable('OTPs', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      /**Mã người dùng */
-      userId: {
-        type: Sequelize.INTEGER,
-        unique: true
+      /**Địa chỉ gửi OTP đến email hoặc SĐT */
+      sendAddress: {
+        type: Sequelize.STRING
       },
-      refreshToken: {
-        type: Sequelize.TEXT
-      },
-      accessToken: {
-        type: Sequelize.TEXT
+      /**Nội dung của mã OTP */
+      otpCode: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -33,6 +29,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('LoginTokens');
+    await queryInterface.dropTable('OTPs');
   }
 };
