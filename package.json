@@ -27,7 +27,6 @@
     "mailersend": "^2.3.0",
     "mkdirp": "^3.0.1",
     "morgan": "^1.10.0",
-    "mysql2": "^3.11.3",
     "sequelize": "^6.37.5",
     "validator": "^13.12.0"
   },
@@ -39,6 +38,6 @@
     "sequelize-cli": "^6.6.2"
   },
   "optionalDependencies": {
-    "mysql2": "^x.x.x"
+    "mysql2": "^3.11.3"
   }
 }
