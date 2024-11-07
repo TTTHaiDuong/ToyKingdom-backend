@@ -2,10 +2,18 @@ import { Sequelize } from 'sequelize';
 import { exec } from 'child_process'
 import 'dotenv/config'
 
-const sequelize = new Sequelize(process.env.DB_CONNECTION_DATABASE_NAME, 'root', null, {
+const sequelize = new Sequelize(process.env.DB_CONNECTION_DATABASE_NAME, 'frontend', 'toykingdom', {
   host: '127.0.0.1',
-  port: process.env.MYSQL_PORT,
   dialect: 'mysql',
+  port: process.env.MYSQL_PORT, // Cổng MySQL mặc định, thay đổi nếu khác
+  dialectOptions: {
+    connectTimeout: 60000, // Thời gian chờ kết nối
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000,
+  }
 });
 
 /**Thử kết nối đến cơ sở dữ liệu */

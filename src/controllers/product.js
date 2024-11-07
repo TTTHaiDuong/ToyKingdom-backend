@@ -1,4 +1,5 @@
 import productServices from '../services/product.js';
+import mongoProductServices from '../mongo-services/product.js';
 
 const create = async (req, res) => {
     const { attributes } = req.body;
@@ -29,7 +30,13 @@ const findAll = async (req, res) => {
 
     const exclude = (role !== 'owner' && role !== 'admin') && 'revenue';
 
-    productServices.findAll(conditions, exclude, page, limit, (err, products) => {
+    // productServices.findAll(conditions, exclude, page, limit, (err, products) => {
+    //     console.log(err);
+    //     if (err) return res.status(500).json({ message: 'Server error' });
+    //     return res.status(200).json({ products })
+    // });
+
+    await mongoProductServices.findAll(conditions, null, exclude, page, limit, (err, products) => {
         console.log(err);
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ products })

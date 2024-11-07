@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import initWebRouters from './src/route/web.js';
 import configViewEngine from './src/config/view-engine.js';
-import connectDB from './src/config/db-connection.js';
+// import connectDB from './src/config/db-connection.js';
 import 'dotenv/config.js';
+import connectDB from './src/config/mongo-db-connection.js';
+import seeder from './src/mongo-seeders/index.js';
 
 // Khởi tạo ứng dụng bằng express
 let app = express();
@@ -28,8 +30,11 @@ app.use(express.urlencoded({ extended: true })); // Cấu hình xử lý dữ li
 // configViewEngine(app); // Cấu hình view engine
 initWebRouters(app); // Khởi tạo router
 
-connectDB.testConnection(); // Test connection
+connectDB();
+// connectDB.testConnection(); // Test connection
 //connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
+
+seeder.update();
 
 // Chạy server
 app.listen(+process.env.PORT, () => {

@@ -1,118 +1,113 @@
 import db from '../models/index.js';
-import CustomError from './custom-error.js';
 
-/**
- * Tạo một đánh giá sản phẩm
- * @param {Number} productId mã sản phẩm
- * @param {Number} rating điểm đánh giá (1->5)
- * @param {String} comment nhận xét
- * @param {function(ProductReview?, Error?)?} callback (review, error)
- * @return {Promise<ProductReview> | void}
- */
-const upsert = async (productId, userId, rating, comment, callback) => {
+const upsert = async (id, attributes, callback, transaction) => {
     try {
-        const review = await db.ProductReview.create({
-            productId: productId,
-            userId: userId,
-            rating: rating,
-            comment: comment,
-            reviewDate: Date.now()
-        }, { raw: true });
+        const { userId, productId, rating, comment, reviewDate } = attributes;
 
-        if (callback) callback(null, review);
-        else return review;
-    }
-    catch (err) {
-        if (callback) callback(err, null);
-        else throw err;
-    }
-}
+        const data = {
+            ...(userId && { userId: userId }),
+            ...(productId && { productId: productId }),
+            ...(rating && { rating: rating }),
+            ...(comment !== undefined && { comment: comment }),
+            ...(saleDate && { saleDate: saleDate })
+        }
 
-const findOne = async () => {
-
-}
-
-/**
- * Lấy đánh giá sản phẩm
- * @param {{id: Number | [Number, Boolean], productId: Number | [Number, Boolean],
- * userId: Number | [Number, Boolean], rating: Number | [Number, Number],
- * comment: String | [String, Boolean], reviewDate: Date | [Date, Date],
- * createdAt: Date | [Date, Date], updatedAt: Date | [Date, Date], 
- * order: [[by: String, type: String]]}} conditions điều kiện để tìm đánh giá sản phẩm
- * 
- * @param {function([ProductReview]?, Error?)?} callback (reviews, error)
- * @return {Promise<[ProductReview]> | void} 
- */
-const findAll = async (conditions, page = 1, limit = 10, callback) => {
-    try {
-        let { id, productId, userId, rating, comment, reviewDate, createdAt, updatedAt, order } = conditions;
-        order = order || [['id', 'ASC']];
-
-        const where = {
-            ...(id && (Array.isArray(id) ? (id[1] === true ? { id: id }
-                : { id: { [Op.like]: `%${id}%` } }) : { id: id })),
-
-            ...(productId && (Array.isArray(productId) ? (productId[1] === true ? { productId: productId }
-                : { productId: { [Op.like]: `%${productId}%` } }) : { productId: productId })),
-
-            ...(userId && (Array.isArray(userId) ? (userId[1] === true ? { userId: userId }
-                : { userId: { [Op.like]: `%${userId}%` } }) : { userId: userId })),
-
-            ...(rating && (Array.isArray(rating) ? { rating: { [Op.between]: [rating[0], rating[1]] } }
-                : { rating: rating })),
-
-            ...(comment && (Array.isArray(comment) ? (comment[1] === true ? { comment: comment }
-                : Sequelize.where(Sequelize.fn('search_string', Sequelize.col('comment'), comment), true)) : { comment: comment })),
-
-            ...(reviewDate && (Array.isArray(reviewDate) ? { reviewDate: reviewDate }
-                : { reviewDate: { [Op.between]: [reviewDate[0], reviewDate[1]] } })),
-
-            ...(createdAt && (Array.isArray(createdAt) ? { createdAt: createdAt }
-                : { createdAt: { [Op.between]: [createdAt[0], createdAt[1]] } })),
-
-            ...(updatedAt && (Array.isArray(updatedAt) ? { updatedAt: updatedAt }
-                : { updatedAt: { [Op.between]: [updatedAt[0], updatedAt[1]] } })),
-        };
-
-        const reviews = await db.ProductReview.findAll({
-            where: where,
-            group: ['ProductReview.id'],
-            order: order,
-            limit: +limit,
-            offset: (page - 1) * limit,
-            raw: true
-        });
-
-        if (callback) callback(null, reviews);
-        else return reviews;
-    }
-    catch (err) {
-        if (callback) callback(err, null);
-        else throw err;
-    }
-}
-
-/**
- * Xoá một đánh giá sản phẩm
- * @param {Number} id mã đánh giá
- * @param {function(Error?)?} callback (error)
- * @return {Promise<void> | void}
- */
-const destroy = async (id, callback) => {
-    try {
-        const [deleted] = await db.ProductReview.destroy({
-            where: { id: id }
-        });
-
-        if (deleted == 0) {
-            const err = new CustomError('NoReviewDeletedError');
-            if (callback) callback(err);
-            else throw err;
+        if (id) {
+            const [updatedCount] = await db.ProductReview.update(data, {
+                where: { id: id },
+                transaction: transaction
+            });
+            if (callback) return callback(null, updatedCount);
+            return updatedCount;
+        }
+        else {
+            const cart = await db.ProductReview.create(data, {
+                transaction: transaction
+            });
+            if (callback) return callback(null, cart);
+            return cart;
         }
     }
     catch (err) {
-        if (callback) callback(err);
-        else throw err;
+        if (err) return callback(err, null);
+        throw err;
+    }
+}
+
+const findOne = async (id, exclude, callback) => {
+    try {
+        exclude = Array.isArray(exclude) ? exclude : (exclude ? [exclude] : []);
+
+        const cart = await db.Cart.findByPk(id);
+
+        if (callback) return callback(null, cart);
+        return cart;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
+        throw err;
+    }
+}
+
+const findAll = async (conditions, exclude, page = 1, limit = 10, callback) => {
+    try {
+        const { id, productId, userId, quantity, price } = conditions;
+
+        const where = {
+            ...(id && (Array.isArray(id) ? (typeof id[1] === 'string' ? { id: { [Op[id[1]]]: id } }
+                : { id: { [Op.between]: [id[0], id[1]] } }) : { id: id })),
+
+            ...(productId && (Array.isArray(productId) ? (typeof productId[1] === 'string' ? { productId: { [Op[productId[1]]]: productId } }
+                : { productId: { [Op.between]: [productId[0], productId[1]] } }) : { productId: productId })),
+
+            ...(userId && (Array.isArray(userId) ? (typeof userId[1] === 'string' ? { userId: { [Op[id[1]]]: userId } }
+                : { userId: { [Op.between]: [userId[0], userId[1]] } }) : { userId: userId })),
+
+            ...(price && (Array.isArray(price) ? (typeof price[1] === 'string' ? { price: { [Op[price[1]]]: price[0] } }
+                : { price: { [Op.between]: [price[0], price[1]] } }) : { price: price })),
+
+            ...(quantity && (Array.isArray(quantity) ? (typeof quantity[1] === 'string' ? { quantity: { [Op[quantity[1]]]: quantity[0] } }
+                : { quantity: { [Op.between]: [quantity[0], quantity[1]] } }) : { quantity: quantity }))
+        }
+
+        exclude = Array.isArray(exclude) ? exclude : (exclude ? [exclude] : []);
+
+        const carts = await db.Product.findAll({
+            attributes: {
+                include: [
+                    ...(!exclude.includes('revenue') ? [[Sequelize.literal(`(SELECT COALESCE(SUM(price * quantity), 0) FROM SoldProducts WHERE SoldProducts.productId = Product.id)`), 'revenue']] : []),
+                    ...(!exclude.includes('totalSold') ? [[Sequelize.literal(`(SELECT COALESCE(SUM(quantity), 0) FROM SoldProducts WHERE SoldProducts.productId = Product.id)`), 'totalSold']] : []),
+                    ...(!exclude.includes('rating') ? [[Sequelize.literal(`(SELECT COALESCE(ROUND(AVG(rating), 1), 0) FROM ProductReviews WHERE ProductReviews.productId = Product.id)`), 'rating']] : []),
+                ],
+                exclude: exclude
+            },
+            where: where,
+            order: order || [['id', 'ASC']],
+            offset: (page - 1) * limit,
+            limit: +limit
+        });
+
+        if (callback) return callback(null, carts);
+        return carts;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
+        throw err;
+    }
+}
+
+const destroy = async (ids, callback, transaction) => {
+    try {
+        const deleted = await db.Cart.destroy({
+            where: { id: ids }
+        }, { transaction: transaction });
+
+        if (callback) return callback(null, deleted);
+        return deleted;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
+        throw err;
     }
 }
 
