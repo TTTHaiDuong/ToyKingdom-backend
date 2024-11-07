@@ -1,7 +1,9 @@
 import productSeeder from './product.js';
 import soldProductSeeder from './sold-product.js';
+import userSeeder from './user.js'
+import mongoose from 'mongoose';
 
-const seeders = [productSeeder, soldProductSeeder];
+const seeders = [productSeeder, soldProductSeeder, userSeeder];
 
 const up = async () => {
     for (const seeder of seeders)
@@ -14,8 +16,8 @@ const down = async () => {
 };
 
 const update = async () => {
-    for (const seeder of seeders)
-        await seeder.update();
+    await down();
+    await up();
 };
 
 export default { up, down, update }

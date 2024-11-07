@@ -1,12 +1,13 @@
-import userServices from '../services/user.js';
+import userServices from '../mongo-services/user.js';
 import passport from '../middlewares/passport.js';
+import auth from './auth.js';
 
 const findOne = async (req, res) => {
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload._id;
     const role = req.tokenPayload.role;
-    const { id } = req.query;
+    const { _id } = req.query;
 
-    const targetId = (role === 'admin' || role === 'owner') ? (id || userId) : userId;
+    const targetId = (role === 'admin' || role === 'owner') ? (_id || userId) : userId;
 
     userServices.findOne(targetId, null, (err, user) => {
         if (err) return res.status(500).json({ message: 'Server error' });
@@ -19,24 +20,25 @@ const findOne = async (req, res) => {
 }
 
 const findAll = (req, res) => {
-    const { filter, page, limit } = req.query;
+    const { filter, page, limit, order } = req.query;
     const conditions = filter && JSON.parse(filter);
 
-    userServices.findAll(conditions, page, limit, (err, users) => {
+    userServices.findAll(conditions, order, null, page, limit, (err, users) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ users })
     });
 }
 
 const update = async (req, res) => {
-    const { id, attributes } = req.body;
+    const { _id, attributes } = req.body;
     const { role } = req.tokenPayload;
+    const { email, phone } = attributes;
 
-    const invalid = await validateRegisterInfo({ email: attributes.email, phone: attributes.phone });
-    if (invalid) return res.status(400).json({ invalidStack: invalid, message: 'Invalid email or phone' });
-    if (!id) return res.status(400).json({ message: 'Missing id' });
+    const invalid = await auth.validateRegisterInfo({ email: email, phone: phone });
+    if ((email || phone) && invalid) return res.status(400).json({ invalidStack: invalid, message: 'Invalid email or phone' });
+    if (!_id) return res.status(400).json({ message: 'Missing _id' });
 
-    userServices.upsert(id, attributes, async (err, user) => {
+    userServices.upsert(_id, attributes, async (err, user) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ updated: user })
     });

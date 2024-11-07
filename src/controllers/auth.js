@@ -1,14 +1,16 @@
-import authServices from '../services/auth.js';
-import passwordServices from '../services/password.js';
-import tokenServices from '../services/token.js';
+import authServices from '../mongo-services/auth.js';
+import passwordServices from '../mongo-services/password.js';
+import tokenServices from '../mongo-services/token.js';
 import sendEmail from '../services/send-email.js';
 import validator from 'validator';
+import CustomError from '../mongo-services/custom-error.js';
+import { User } from '../models.js';
 
 const validateRegisterInfo = async ({ email, phone }, callback) => {
     try {
         if (!email && !phone) {
             if (callback) return callback(['Missing email or phone']);
-            throw err;
+            return ['Missing email or phone'];
         }
 
         const errors = [];
@@ -16,12 +18,11 @@ const validateRegisterInfo = async ({ email, phone }, callback) => {
         if (email && !validator.isEmail(email)) errors.push('Invalid email');
         if (phone && !validator.isMobilePhone(phone, 'any')) errors.push('Invalid phone');
 
-        const existing = await db.User.findOne({
-            where: {
-                ...(email && (uniqueEmail || uniqueEmail === undefined) && { email: email }),
-                ...(phone && (uniquePhone || uniquePhone === undefined) && { phone: phone })
-            }
+        const existing = await User.findOne({
+            ...(email && { email: email }),
+            ...(phone && { phone: phone })
         });
+        console.log(existing)
 
         if (existing) {
             if (email && email === existing.email) errors.push('Existing email');

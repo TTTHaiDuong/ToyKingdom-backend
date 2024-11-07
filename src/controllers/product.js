@@ -1,5 +1,4 @@
-import productServices from '../services/product.js';
-import mongoProductServices from '../mongo-services/product.js';
+import productServices from '../mongo-services/product.js';
 
 const create = async (req, res) => {
     const { attributes } = req.body;
@@ -11,53 +10,46 @@ const create = async (req, res) => {
 }
 
 const findOne = async (req, res) => {
-    const { id } = req.query;
+    const { _id } = req.query;
     const { role } = req.tokenPayload || { role: 'any' };
 
     const exclude = (role !== 'owner' && role !== 'admin') && 'revenue';
 
-    productServices.findOne(id, exclude, (err, product) => {
+    productServices.findOne(_id, exclude, (err, product) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ product })
     });
 }
 
 const findAll = async (req, res) => {
-    const { filter, page, limit } = req.query;
+    const { filter, order, page, limit } = req.query;
     const { role } = req.tokenPayload || { role: 'any' };
 
-    const conditions = filter && JSON.parse(filter);
+    const criteria = filter && JSON.parse(filter);
 
     const exclude = (role !== 'owner' && role !== 'admin') && 'revenue';
 
-    // productServices.findAll(conditions, exclude, page, limit, (err, products) => {
-    //     console.log(err);
-    //     if (err) return res.status(500).json({ message: 'Server error' });
-    //     return res.status(200).json({ products })
-    // });
-
-    await mongoProductServices.findAll(conditions, null, exclude, page, limit, (err, products) => {
-        console.log(err);
+    productServices.findAll(criteria, order, exclude, page, limit, (err, products) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ products })
     });
 }
 
 const update = async (req, res) => {
-    const { id, attributes } = req.body;
+    const { _id, attributes } = req.body;
 
-    if (!id) return res.status(400).json({ message: 'Missing id' });
+    if (!_id) return res.status(400).json({ message: 'Missing _id' });
 
-    productServices.upsert(id, attributes, null, (err, updated) => {
+    productServices.upsert(_id, attributes, null, (err, updated) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ message: 'Ok' });
     });
 }
 
 const destroy = async (req, res) => {
-    const { ids } = req.body;
+    const { _ids } = req.body;
 
-    productServices.destroy(ids, (err, deleted) => {
+    productServices.destroy(_ids, (err, deleted) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ deleted: deleted });
     });

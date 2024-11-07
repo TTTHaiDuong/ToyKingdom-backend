@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
-import db from '../models/index.js';
 import CustomError from './custom-error.js';
+import { User } from '../models.js';
+import 'dotenv/config';
 
 /**
  * 
@@ -9,7 +10,7 @@ import CustomError from './custom-error.js';
  * @param {function(Error?)?} callback 
  * @returns {Promise<void>}
  */
-const generate = async (userId, password, callback, transaction) => {
+const generate = async (userId, password, callback, session) => {
     try {
         if (!password || password === '') {
             const err = new CustomError('EmptyPasswordError',
@@ -22,15 +23,10 @@ const generate = async (userId, password, callback, transaction) => {
         const hashedPass = await bcrypt.hash(password, +process.env.SALT_LENGTH);
 
         // Cập nhật vào bản ghi
-        const [updatedCount] = await db.User.update({
-            password: hashedPass
-        }, {
-            where: { id: userId },
-            transaction: transaction
-        });
+        const updated = await User.updateOne({ _id: userId }, { password: hashedPass });
 
         // Nếu không có bản ghi nào được cập nhật
-        if (updatedCount == 0) {
+        if (updated.modifiedCount === 0) {
             const err = new CustomError('NoPasswordUpdatedError',
                 ['paramInfo', { variable: 'userId' }]);
             if (callback) return callback(err);
@@ -53,7 +49,7 @@ const generate = async (userId, password, callback, transaction) => {
  */
 const verify = async (userId, password, callback) => {
     try {
-        const user = await db.User.findByPk(userId);
+        const user = await User.findById(userId);
 
         // Nếu người dùng không tồn tại
         if (!user) {

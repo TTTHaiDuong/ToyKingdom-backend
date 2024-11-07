@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 
 const initProduct = () => {
-    const product = new mongoose.Schema({
-        _id: { type: Number, required: true },
+    const schema = new mongoose.Schema({
         name: { type: String, required: true },
         categories: { type: Array, required: false },
 
@@ -17,59 +16,60 @@ const initProduct = () => {
         suitableAge: { type: Number, required: false },
         tag: { type: String, required: false }
     });
-    product.index({ name: 'text', brand: 'text', tag: 'text' });
-    return mongoose.model('Product', product);
+    schema.index({ name: 'text', brand: 'text', tag: 'text' });
+    return mongoose.model('Product', schema, 'Product');
 }
 
 const initCart = () => {
-    const cart = new mongoose.Schema({
+    const schema = new mongoose.Schema({
         productId: { type: String, required: true },
         userId: { type: String, required: true },
         quanity: { type: Number, required: true }
     });
-    return mongoose.model('Cart', cart);
+    return mongoose.model('Cart', schema, 'Cart');
 }
 
 const initSoldProduct = () => {
-    const soldProduct = new mongoose.Schema({
-        productId: { type: Number, required: true },
-        userId: { type: Number, required: true },
+    const schema = new mongoose.Schema({
+        productId: { type: String, required: true },
+        userId: { type: String, required: true },
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
         saleDate: { type: Date, required: true }
     });
-    return mongoose.model('SoldProduct', soldProduct);
+    return mongoose.model('SoldProduct', schema, 'SoldProduct');
 }
 
 const initProductReview = () => {
-    const productReview = new mongoose.Schema({
+    const schema = new mongoose.Schema({
         productId: { type: String, required: true },
         userId: { type: String, required: true },
         rating: { type: Number, required: true },
         comment: { type: String, required: false },
         reviewDate: { type: Date, required: true }
     });
-    return mongoose.model('ProductReview', productReview);
+    return mongoose.model('ProductReview', schema, 'ProductReview');
 }
 
 const initUser = () => {
-    const user = new mongoose.Schema({
+    const schema = new mongoose.Schema({
         email: { type: String, required: true },
         phone: { type: String, required: true },
         password: { type: String, required: true },
         fullName: { type: String, required: true },
         role: { type: String, required: true }
     });
-    return mongoose.model('User', user);
+    schema.index({ email: 'text', fullName: 'text' });
+    return mongoose.model('User', schema, 'User');
 }
 
 const initToken = () => {
-    const token = new mongoose.Schema({
+    const schema = new mongoose.Schema({
         userId: { type: String, required: true },
         accessToken: { type: String, required: true },
         refreshToken: { type: String, required: true }
     });
-    return mongoose.model('Token', token)
+    return mongoose.model('Token', schema, 'Token')
 }
 
 export const Product = initProduct();

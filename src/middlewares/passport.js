@@ -1,4 +1,4 @@
-import tokenServices from '../services/token.js';
+import tokenServices from '../mongo-services/token.js';
 
 /** Danh sách quyền của các vai trò */
 const userRoles = {
@@ -25,6 +25,7 @@ const checkRole = (role) => async (req, res, next) => {
             return res.status(403).json({ message: 'Access denied' });
 
         req.tokenPayload = decode;
+
         next();
     });
 }

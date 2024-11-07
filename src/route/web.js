@@ -30,13 +30,16 @@ const initWebRouters = (app) => {
 const initPublicRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/', async (req, res) => { return res.status(200).json({ message: 'Welcome to Toykingdom Server' }) });
-    router.post('/login', authController.login); // Yêu cầu đăng nhập
+    router.get('/', async (req, res) => {
+        return res.status(200).json({ message: 'Welcome to Toykingdom Server' })
+    });
+
+    router.post('/login', authController.login);
     router.post('/signup', authController.signup);
     router.post('/access/refresh', authController.refreshAccessToken);
 
-    router.get('/product/findAll', productController.findAll);
     router.get('/product/findOne', productController.findOne);
+    router.get('/product/findAll', productController.findAll);
 
     return parentRouter.use('/', router);
 }
@@ -55,8 +58,10 @@ const initUserRoutes = (parentRouter) => {
 const initAdminRoutes = (parentRouter) => {
     const router = express.Router();
 
+    router.get('/user/findOne', userController.findOne);
     router.get('/user/findAll', userController.findAll);
-    // router.delete('/user/delete', productController.getOneProduct_Admin);
+    router.put('/user/update', userController.update);
+    router.delete('/user/delete', userController.destroy);
 
     router.post('/product/create', productController.create);
     router.get('/product/findOne', productController.findOne);
