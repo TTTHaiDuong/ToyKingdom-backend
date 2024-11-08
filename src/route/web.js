@@ -43,6 +43,8 @@ const initPublicRoutes = (parentRouter) => {
     router.get('/product/findOne', productController.findOne);
     router.get('/product/findAll', productController.findAll);
 
+    router.get('/product/image/find', productImageController.find);
+
     return parentRouter.use('/', router);
 }
 
@@ -72,7 +74,6 @@ const initAdminRoutes = (parentRouter) => {
     router.delete('/product/delete', productController.destroy);
 
     router.post('/product/image/create', upload.single('image'), productImageController.create);
-    router.get('/product/image/find', productImageController.find);
     router.put('/product/image/update', upload.single('image'), productImageController.update);
     router.delete('/product/image/delete', productImageController.destroy);
 
