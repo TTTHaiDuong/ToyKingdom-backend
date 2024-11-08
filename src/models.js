@@ -36,6 +36,28 @@ const initCart = () => {
         userId: { type: String, required: true },
         quantity: { type: Number, required: true }
     });
+
+    schema.pre('save', async (next) => {
+        try {
+            const existingDoc = await Cart.findOne({
+                productId: this.productId,
+                userId: this.userId
+            });
+
+            if (existingDoc) {
+                existingDoc.quantity += this.quantity;
+                await existingDoc.save();
+                next(new Error('Duplicate document'));
+            }
+            else {
+                next();
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+
     return mongoose.model('Cart', schema, 'Cart');
 }
 

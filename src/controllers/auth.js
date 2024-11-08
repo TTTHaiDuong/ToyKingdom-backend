@@ -1,6 +1,7 @@
 import authSv from '../services/auth.js';
 import passwordSv from '../services/password.js';
 import tokenSv from '../services/token.js';
+import userSv from '../services/user.js';
 import sendEmail from '../old-services/send-email.js';
 import CustomError from '../services/custom-error.js';
 
@@ -36,8 +37,9 @@ const logout = async (req, res) => {
 const signup = async (req, res) => {
     const { email, phone, fullName, password } = req.body;
 
-    const invalid = await validateRegisterInfo({ email, phone });
-    if (invalid) return res.status(400).json({ invalidStack: invalid, message: 'Invalid email or phone' });
+    if (email && !(await userSv.validateEmail(email))) return res.status(400).json({ message: 'Invalid email' });
+    if (phone && !(await userSv.validatePhone(phone))) return res.status(400).json({ message: 'Invalid phone' });
+    if (!passwordSv.isValid(password)) return res.status(400).json({ message: 'Invalid password length' });
 
     authSv.signup(email, phone, fullName, password, (err, user) => {
         if (err) {

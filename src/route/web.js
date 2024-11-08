@@ -55,7 +55,6 @@ const initUserRoutes = (parentRouter) => {
 
     router.post('/cart/create', cartCtl.create);
     router.get('/cart/find', cartCtl.findByUser);
-    router.put('/cart/update', cartCtl.update);
     router.delete('/cart/delete', cartCtl.destroy);
 
     return parentRouter.use('/user', router);

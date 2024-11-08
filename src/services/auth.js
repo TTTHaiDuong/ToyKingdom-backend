@@ -77,9 +77,9 @@ const logout = async (userId, callback) => {
 
 const signup = async (email, phone, fullName, password, callback) => {
     try {
-        const created = await userSv.upsert(null, { email, phone, password, fullName, role: 'user' });
-        if (callback) return callback(null, created);
-        return created;
+        const user = await userSv.create({ email, phone, password, fullName, role: 'user' });
+        if (callback) return callback(null, user);
+        return user;
     }
     catch (err) {
         if (callback) return callback(err, null)

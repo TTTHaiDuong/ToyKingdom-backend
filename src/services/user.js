@@ -13,7 +13,8 @@ const validateEmail = async (email, callback) => {
         const count = await User.countDocuments({ email });
         if (count > 0) err = new CustomError('ExistingEmailError');
 
-        if (callback) return callback(err)
+        if (callback) return callback(err);
+        return err === undefined;
     }
     catch (err) {
         if (callback) return callback(err);
@@ -30,7 +31,8 @@ const validatePhone = async (phone, callback) => {
         const count = await User.countDocuments({ phone });
         if (count > 0) err = new CustomError('ExistingPhoneError');
 
-        if (callback) return callback(err)
+        if (callback) return callback(err);
+        return err === undefined;
     }
     catch (err) {
         if (callback) return callback(err);

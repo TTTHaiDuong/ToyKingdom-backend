@@ -38,12 +38,12 @@ const findByAdmin = async (req, res) => {
 
 const update = async (req, res) => {
     const userId = req.tokenPayload._id;
-    const { _id, productId, quantity } = req.body;
+    const { _id, quantity } = req.body;
 
     try {
         const updated = await Cart.updateOne(
             { _id: _id, userId: userId },
-            { productId, quantity }
+            { quantity }
         );
         return res.status(200).json({ updated: updated, messsage: 'Ok' })
     }

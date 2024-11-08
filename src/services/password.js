@@ -3,14 +3,8 @@ import CustomError from './custom-error.js';
 import { User } from '../models.js';
 import 'dotenv/config';
 
-const isValid = (password, callback) => {
-    if (!password || password === '') {
-        const err = new CustomError('EmptyPasswordError');
-
-        if (callback) return callback(err);
-        throw err;
-    }
-    if (callback) return callback(null);
+const isValid = (password) => {
+    return password && password != ''
 }
 
 /**
@@ -22,7 +16,12 @@ const isValid = (password, callback) => {
  */
 const generate = async (userId, password, callback, session) => {
     try {
-        isValid(password);
+        if (isValid(password)) {
+            const err = new CustomError('EmptyPasswordError');
+            if (callback) return callback(err);
+            throw err;
+        };
+
         // Băm mật khẩu
         const hashed = await bcrypt.hash(password, +process.env.SALT_LENGTH);
         // Cập nhật vào bản ghi

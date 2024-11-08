@@ -25,12 +25,9 @@ app.use(cors({ origin: true }));
 app.use(express.json()); // Middleware để xử lý json từ client
 app.use(express.urlencoded({ extended: true })); // Cấu hình xử lý dữ liệu từ form HTML
 
-// configViewEngine(app); // Cấu hình view engine
 initWebRouters(app); // Khởi tạo router
 
 connectDB();
-// connectDB.testConnection(); // Test connection
-//connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
 
 // seeder.update();
 
