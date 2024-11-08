@@ -287,7 +287,7 @@ const up = async () => {
             // 9
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8eb'),
             name: 'Bàn chơi Khúc Côn Cầu UNITED SPORT A6030',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
 
             discount: null,
             price: 834000,
@@ -321,7 +321,7 @@ const up = async () => {
             // 10
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ec'),
             name: 'Bàn chơi Bi Lắc UNITED SPORT A6026',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
 
             discount: null,
             price: 834000,
@@ -350,7 +350,7 @@ const up = async () => {
             // 11
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ed'),
             name: 'Xe đạp trẻ em Royal Baby Flying Bear 16 inch Màu Vàng RB16B-9',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
             discount: null,
 
             price: 3114000,
@@ -379,7 +379,7 @@ const up = async () => {
             // 12
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ee'),
             name: 'Xe đạp trẻ em Royal Baby Freestyle 18 inch Màu Đỏ RB18B-6',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
             discount: null,
             price: 3018000,
             stock: 20,
@@ -407,7 +407,7 @@ const up = async () => {
             // 13
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ef'),
             name: 'Patin Neon Inline Yvolution xanh dương NT07B4-size 4-7 tuổi',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
             discount: null,
 
             price: 1521000,
@@ -440,7 +440,7 @@ const up = async () => {
             // 14
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f0'),
             name: 'Xe Scooter 2 bánh Neon Vector Yvolution NT05B2 xanh dương',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
             discount: null,
 
             price: 1279000,
@@ -531,7 +531,7 @@ const up = async () => {
             // 17
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f3'),
             name: 'Xe tập đi 3 trong 1 PEEK A BOO EU461542',
-            category: 'Khác',
+            category: 'Đồ chơi vận động',
             discount: null,
 
             price: 1189000,
