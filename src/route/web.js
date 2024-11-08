@@ -2,7 +2,8 @@ import express from 'express';
 import authController from '../controllers/auth.js';
 import userController from '../controllers/user.js';
 import productController from '../controllers/product.js';
-import productImageController from '../controllers/product-image.js'
+import productImageController from '../controllers/product-image.js';
+import cartController from '../controllers/cart.js';
 import passport from '../middlewares/passport.js';
 import upload from '../middlewares/image-upload.js';
 
@@ -13,7 +14,7 @@ const initWebRouters = (app) => {
 
     router.all('*', checkPermission);
     initPublicRoutes(router);
-    // initUserRoutes(router);
+    initUserRoutes(router);
     initAdminRoutes(router);
     // initOwnerRoutes(router);
     initRegisteredRoutes(router);
@@ -52,7 +53,10 @@ const initPublicRoutes = (parentRouter) => {
 const initUserRoutes = (parentRouter) => {
     const router = express.Router();
 
-
+    router.post('/cart/create', cartController.create);
+    router.get('/cart/find', cartController.findByUser);
+    router.put('/cart/update', cartController.update);
+    router.delete('/cart/delete', cartController.destroy);
 
     return parentRouter.use('/user', router);
 }
@@ -83,7 +87,6 @@ const initAdminRoutes = (parentRouter) => {
 const initOwnerRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.put('/role/update',);
 
     return parentRouter.use('/owner', router);
 }

@@ -34,7 +34,7 @@ const initCart = () => {
     const schema = new mongoose.Schema({
         productId: { type: String, required: true },
         userId: { type: String, required: true },
-        quanity: { type: Number, required: true }
+        quantity: { type: Number, required: true }
     });
     return mongoose.model('Cart', schema, 'Cart');
 }
