@@ -34,7 +34,7 @@ connectDB();
 // connectDB.testConnection(); // Test connection
 //connectDB.startMySqlServer(); // Kiểm tra và khởi động MySQL server
 
-seeder.update();
+// seeder.update();
 
 // Chạy server
 app.listen(+process.env.PORT, () => {

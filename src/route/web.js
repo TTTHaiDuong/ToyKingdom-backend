@@ -52,8 +52,7 @@ const initPublicRoutes = (parentRouter) => {
 const initUserRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/profile', userController.getUserProfile);
-    router.put('/update', userController.updateUserProfile);
+
 
     return parentRouter.use('/user', router);
 }
@@ -95,7 +94,7 @@ const initRegisteredRoutes = (parentRouter) => {
     router.delete('/logout', authController.logout);
     router.put('/password/update', authController.changePassword);
 
-    router.get('/user/findOne', userController.findOne);
+    router.get('/profile', userController.findOne);
 
     return parentRouter.use('/registered', router);
 }
