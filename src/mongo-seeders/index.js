@@ -1,9 +1,9 @@
 import productSeeder from './product.js';
 import soldProductSeeder from './sold-product.js';
-import userSeeder from './user.js'
-import mongoose from 'mongoose';
+import userSeeder from './user.js';
+import productImageSeeder from './product-image.js';
 
-const seeders = [productSeeder, soldProductSeeder, userSeeder];
+const seeders = [productSeeder, soldProductSeeder, userSeeder, productImageSeeder];
 
 const up = async () => {
     for (const seeder of seeders)

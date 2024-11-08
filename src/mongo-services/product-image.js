@@ -21,9 +21,13 @@ const upsert = async (_id, attributes, callback, session) => {
     }
 }
 
-const find = async (productId, callback) => {
+const find = async (productId, order, callback) => {
     try {
-        const images = await ProductImage.find({ productId: productId }).order({ order: 1 });
+        const images = await ProductImage.find({
+            productId: productId,
+            ...(order && { order: order })
+        }).sort({ order: 1 });
+
         if (callback) return callback(null, images);
         return images;
     }

@@ -5,16 +5,15 @@ const create = async (req, res) => {
     const { file } = req;
 
     productImageServices.upsert(null, { productId, buffer: file.buffer, mimetype: file.mimetype, order, altText }, (err, images) => {
-        console.error(err)
         if (err) return res.status(500).json({ message: 'Can not save images' });
         return res.status(200).json({ createdCount: images.length, message: 'Ok' });
     });
 }
 
 const find = async (req, res) => {
-    const { productId } = req.query;
+    const { productId, order } = req.query;
 
-    productImageServices.find(productId, (err, images) => {
+    productImageServices.find(productId, order, (err, images) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ images: images, message: 'Ok' });
     });
