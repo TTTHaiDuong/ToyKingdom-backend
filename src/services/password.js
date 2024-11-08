@@ -25,7 +25,7 @@ const generate = async (userId, password, callback, session) => {
         // Băm mật khẩu
         const hashed = await bcrypt.hash(password, +process.env.SALT_LENGTH);
         // Cập nhật vào bản ghi
-        const updated = await User.updateOne({ _id: userId }, { password: hashed }, { session });
+        const updated = await User.updateOne({ _id: userId }, { password: hashed }, { ...(session && { session }) });
 
         // Nếu không có bản ghi nào được cập nhật
         if (updated.modifiedCount === 0) {

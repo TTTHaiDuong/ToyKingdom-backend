@@ -5,7 +5,7 @@ import toQueryOperatorObject from './mongoose-query-operator-object.js.js'
 const create = async (attributes, callback, session) => {
     try {
         let cart = new Cart(attributes);
-        await cart.save({ session });
+        await cart.save({ ...(session && { session }) });
         cart = cart.toObject();
         delete cart.__v;
 
@@ -86,7 +86,7 @@ const update = async (attributes, callback, session) => {
         const cart = await Cart.findOneAndUpdate(
             { _id: _id },
             { $set: attributes },
-            { new: true, session }
+            { new: true, ...(session && { session }) }
         ).select('-__v -password');
 
         if (callback) return callback(null, cart);
@@ -101,7 +101,7 @@ const update = async (attributes, callback, session) => {
 const destroy = async (ids, userId, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);
-        const result = await Cart.deleteMany({ _id: { $in: _ids }, ...(userId && { userId }) }, { session });
+        const result = await Cart.deleteMany({ _id: { $in: _ids }, ...(userId && { userId }) }, { ...(session && { session }) });
         if (callback) return callback(null, result);
         else return result;
     }

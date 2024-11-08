@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 const create = async (attributes, callback, session) => {
     try {
         let product = new Product(attributes);
-        await product.save({ session });
+        await product.save({ ...(session && { session }) });
         product = product.toObject();
         delete product.__v;
 
@@ -143,7 +143,7 @@ const update = async (_id, attributes, callback, session) => {
         const product = await Product.findOneAndUpdate(
             { _id: _id },
             { $set: attributes },
-            { new: true, session }
+            { new: true, ...(session && { session }) }
         ).select('-__v');
 
         if (callback) return callback(null, product);
@@ -158,7 +158,7 @@ const update = async (_id, attributes, callback, session) => {
 const destroy = async (ids, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);
-        const result = await Product.deleteMany({ _id: { $in: _ids } }, { session });
+        const result = await Product.deleteMany({ _id: { $in: _ids } }, { ...(session && { session }) });
         if (callback) return callback(null, result);
         else return result;
     }

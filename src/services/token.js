@@ -29,7 +29,7 @@ const generateAndRecord = async (payload, option, callback, session) => {
         }
         // Cập nhật bản ghi có userId bằng với payload._id, nếu không có thì tạo mới
         if (tokens.accessToken || tokens.refreshToken)
-            await Token.updateOne({ userId: data._id }, tokens, { upsert: true, session });
+            await Token.updateOne({ userId: data._id }, tokens, { upsert: true, ...(session && { session }) });
 
         delete tokens.$setOnInsert;
 

@@ -44,7 +44,7 @@ const create = async (attributes, callback, session) => {
     try {
         attributes.password = await bcrypt.hash(attributes.password, +process.env.SALT_LENGTH);
         let user = new User(attributes);
-        await user.save({ session });
+        await user.save({ ...(session && { session }) });
 
         user = user.toObject();
         delete user.password;
@@ -65,7 +65,7 @@ const update = async (_id, attributes, callback, session) => {
         const user = await User.findOneAndUpdate(
             { _id: _id },
             { $set: attributes },
-            { new: true, session }
+            { new: true, ...(session && { session }) }
         ).select('-__v -password');
 
         if (callback) return callback(null, user);
@@ -132,7 +132,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
 const destroy = async (ids, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);
-        const result = await User.deleteMany({ _id: { $in: _ids } }, { session });
+        const result = await User.deleteMany({ _id: { $in: _ids } }, { ...(session && { session }) });
         if (callback) return callback(null, result);
         else return result;
     }
