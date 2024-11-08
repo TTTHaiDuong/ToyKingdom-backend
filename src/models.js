@@ -10,13 +10,12 @@ const initProduct = () => {
         stock: { type: Number, required: true },
         isSale: { type: Boolean, default: true },
 
-        images: { type: Array, required: false },
         description: { type: String, required: false },
         brand: { type: String, required: false },
         suitableAge: { type: Number, required: false },
         tag: { type: String, required: false }
     });
-    schema.index({ name: 'text', brand: 'text', tag: 'text' });
+    schema.index({ name: 'text', category: 'text', description: 'text', brand: 'text', tag: 'text' });
     return mongoose.model('Product', schema, 'Product');
 }
 

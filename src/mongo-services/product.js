@@ -50,7 +50,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
             discount, revenue, totalSold, rating, totalReviews } = criteria || {};
 
         const project = {
-            _id: 1, name: 1, category: 1, price: 1, brand: 1, images: 1,
+            _id: 1, name: 1, category: 1, price: 1, brand: 1, images: 1, description: 1,
             suitableAge: 1, tag: 1, stock: 1, isSale: 1, discount: 1, revenue: 1, totalSold: 1,
             rating: 1, totalReviews: 1, ...(keyword && { score: { $meta: "textScore" } })
         };
@@ -69,7 +69,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
                 $match: {
                     ...(_id && { _id: Array.isArray(_id) ? { $regex: _id[0], $options: _id.length > 1 ? _id[1] : 'i' } : new mongoose.Types.ObjectId(_id) }),
                     ...(name && { name: Array.isArray(name) ? { $regex: name[0], $options: name.length > 1 ? name[1] : 'i' } : name }),
-                    ...(category && { category: { $in: category } }),
+                    ...(category && { category: Array.isArray(category) ? { $regex: category[0], $options: category.length > 1 ? category[1] : 'i' } : category }),
                     ...(price && { price: Array.isArray(price) ? toQueryObject(price) : price }),
                     ...(brand && { brand: Array.isArray(brand) ? { $regex: brand[0], $options: brand.length > 1 ? brand[1] : 'i' } : brand }),
                     ...(suitableAge && { suitableAge: Array.isArray(suitableAge) ? toQueryObject(suitableAge) : suitableAge }),
