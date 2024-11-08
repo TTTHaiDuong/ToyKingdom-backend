@@ -20,6 +20,17 @@ const initProduct = () => {
     return mongoose.model('Product', schema, 'Product');
 }
 
+const initProductImage = () => {
+    const schema = new mongoose.Schema({
+        productId: { type: String, required: true },
+        buffer: { type: Buffer, required: true },
+        mimetype: { type: String, required: true },
+        order: { type: Number, required: true },
+        altText: { type: String, required: false }
+    });
+    return mongoose.model('ProductImage', schema, 'ProductImage');
+}
+
 const initCart = () => {
     const schema = new mongoose.Schema({
         productId: { type: String, required: true },
@@ -57,9 +68,10 @@ const initUser = () => {
         phone: { type: String, required: true },
         password: { type: String, required: true },
         fullName: { type: String, required: true },
+        address: { type: String, required: false },
         role: { type: String, required: true }
     });
-    schema.index({ email: 'text', fullName: 'text' });
+    schema.index({ email: 'text', fullName: 'text', address: 'text' });
     return mongoose.model('User', schema, 'User');
 }
 
@@ -73,6 +85,7 @@ const initToken = () => {
 }
 
 export const Product = initProduct();
+export const ProductImage = initProductImage();
 export const Cart = initCart();
 export const SoldProduct = initSoldProduct();
 export const ProductReview = initProductReview();

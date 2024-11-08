@@ -2,7 +2,9 @@ import express from 'express';
 import authController from '../controllers/auth.js';
 import userController from '../controllers/user.js';
 import productController from '../controllers/product.js';
+import productImageController from '../controllers/product-image.js'
 import passport from '../middlewares/passport.js';
+import upload from '../middlewares/image-upload.js';
 
 const router = express.Router();
 
@@ -68,6 +70,11 @@ const initAdminRoutes = (parentRouter) => {
     router.get('/product/findAll', productController.findAll);
     router.put('/product/update', productController.update);
     router.delete('/product/delete', productController.destroy);
+
+    router.post('/product/image/create', upload.single('image'), productImageController.create);
+    router.get('/product/image/find', productImageController.find);
+    router.put('/product/image/update', upload.single('image'), productImageController.update);
+    router.delete('/product/image/delete', productImageController.destroy);
 
     return parentRouter.use('/admin', router);
 }

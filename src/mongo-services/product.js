@@ -94,6 +94,14 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
             },
             {
                 $lookup: {
+                    from: 'ProductImage',
+                    localField: '_idToString',
+                    foreignField: 'productId',
+                    as: 'images'
+                }
+            },
+            {
+                $lookup: {
                     from: 'SoldProduct',
                     localField: '_idToString',
                     foreignField: 'productId',

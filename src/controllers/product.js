@@ -49,9 +49,9 @@ const update = async (req, res) => {
 const destroy = async (req, res) => {
     const { _ids } = req.body;
 
-    productServices.destroy(_ids, (err, deleted) => {
+    productServices.destroy(_ids, (err, result) => {
         if (err) return res.status(500).json({ message: 'Server error' });
-        return res.status(200).json({ deleted: deleted });
+        return res.status(200).json({ result: result });
     });
 }
 

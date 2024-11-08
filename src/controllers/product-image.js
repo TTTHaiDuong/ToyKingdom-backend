@@ -1,0 +1,46 @@
+import productImageServices from '../mongo-services/product-image.js';
+
+const create = async (req, res) => {
+    const { productId, order, altText } = req.body;
+    const { file } = req;
+
+    productImageServices.upsert(null, { productId, buffer: file.buffer, mimetype: file.mimetype, order, altText }, (err, images) => {
+        console.error(err)
+        if (err) return res.status(500).json({ message: 'Can not save images' });
+        return res.status(200).json({ createdCount: images.length, message: 'Ok' });
+    });
+}
+
+const find = async (req, res) => {
+    const { productId } = req.query;
+
+    productImageServices.find(productId, (err, images) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ images: images, message: 'Ok' });
+    });
+}
+
+const update = async (req, res) => {
+    const { _id, attributes } = req.body;
+
+    productImageServices.upsert(_id, attributes, (err, image) => {
+        if (err) return res.status(500).json({ message: 'Can not update image' });
+        return res.status(200).json({ updated: image, message: 'Ok' });
+    });
+}
+
+const destroy = async (req, res) => {
+    const { _ids } = req.body;
+
+    productImageServices.destroy(_ids, (err, result) => {
+        if (err) return res.status(500).json({ message: 'Server error' });
+        return res.status(200).json({ result: result });
+    });
+}
+
+export default {
+    create,
+    find,
+    update,
+    destroy
+}

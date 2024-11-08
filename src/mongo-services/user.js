@@ -24,6 +24,7 @@ const upsert = async (_id, attributes, callback, session) => {
             attributes.password = await bcrypt.hash(attributes.password, +process.env.SALT_LENGTH);
             user = new User(attributes);
             await user.save();
+
             user = user.toObject();
             delete attributes.password;
             delete user.password;
