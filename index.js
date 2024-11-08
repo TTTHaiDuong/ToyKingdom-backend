@@ -1,11 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import initWebRouters from './src/route/web.js';
-import configViewEngine from './src/config/view-engine.js';
-// import connectDB from './src/config/db-connection.js';
 import 'dotenv/config.js';
 import connectDB from './src/config/mongo-db-connection.js';
-import seeder from './src/mongo-seeders/index.js';
+import seeder from './src/seeders/index.js';
 
 // Khởi tạo ứng dụng bằng express
 let app = express();

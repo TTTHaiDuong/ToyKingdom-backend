@@ -1,26 +1,15 @@
 import CustomError from './custom-error.js';
-import db from '../models/index.js';
+import { Token } from '../models.js';
 import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 
-/**
- * Tạo token và ghi lại token trong CSDL
- * 
- * @param {{id: Number, email: String, phone: String, role: String}} payload thân của token
- * @param {{accessToken: Boolean?, refreshToken: Boolean?}} option
- * tuỳ chọn tạo access token hoặc refresh token hoặc cả hai
- * @param {function({accessToken: String?, refreshToken: String?}, Error?)?} callback
- * (tokenPair, error)
- * @returns {Promise<{accessToken: String?, refreshToken: String?}> | void}
- */
-const generateAndRecord = async (payload, option, callback, transaction) => {
+const generateAndRecord = async (payload, option, callback, session) => {
     try {
         // Ràng buộc phần thân dữ liệu mà token tải theo
-        const data = { id: payload.id, role: payload.role };
+        const data = { _id: payload._id, role: payload.role };
 
-        if (!data.id || !data.role) {
-            const err = new CustomError('MissingVariableError',
-                ['devInfo', { variable: 'payload' }]);
+        if (!data._id || !data.role) {
+            const err = new CustomError('MissingVariableError');
             if (callback) return callback(err, null)
             throw err;
         }
@@ -38,12 +27,11 @@ const generateAndRecord = async (payload, option, callback, transaction) => {
             tokens.refreshToken = jwt.sign(data, process.env.REFRESH_TOKEN_PRI_KEY,
                 { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN });
         }
-        // Cập nhật bản ghi có userId bằng với payload.id, nếu không có thì tạo mới
+        // Cập nhật bản ghi có userId bằng với payload._id, nếu không có thì tạo mới
         if (tokens.accessToken || tokens.refreshToken)
-            await db.LoginToken.upsert({
-                userId: data.id,
-                ...tokens
-            }, { transaction: transaction });
+            await Token.updateOne({ userId: data._id }, tokens, { upsert: true, session });
+
+        delete tokens.$setOnInsert;
 
         if (callback) return callback(null, tokens);
         return tokens;
@@ -85,24 +73,20 @@ const verify = async (tokenPair, callback) => {
     try {
         const { accessToken, refreshToken } = tokenPair;
         if (!accessToken && !refreshToken) {
-            const err = new CustomError('NotProvidedAnyTokenError',
-                ['paramInfo', { variable: 'tokenPair' }]);
+            const err = new CustomError('NotProvidedAnyTokenError');
             if (callback) return callback(err, null);
             throw err;
         }
 
         // Lấy bản ghi chứa token từ database
-        const tokenCount = await db.LoginToken.count({
-            where: {
-                ...(accessToken && { accessToken: accessToken }),
-                ...(refreshToken && { refreshToken: refreshToken })
-            }
+        const tokenCount = await Token.countDocuments({
+            ...(accessToken && { accessToken }),
+            ...(refreshToken && { refreshToken })
         });
 
         // Nếu bản ghi chứa các token không tồn tại
         if (tokenCount === 0) {
-            const err = new CustomError('TokenNotFoundError',
-                ['paramInfo', { variable: 'tokenPair' }]);
+            const err = new CustomError('TokenNotFoundError');
             if (callback) return callback(err, null);
             throw err;
         }

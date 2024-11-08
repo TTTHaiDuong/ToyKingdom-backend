@@ -1,53 +1,52 @@
-import db from '../models/index.js';
-import { Sequelize, Op } from 'sequelize';
+import bcrypt from 'bcryptjs';
+import CustomError from './custom-error.js';
+import { User } from '../models.js';
+import mongoose from 'mongoose';
+import validator from 'validator';
 
-/**
- * 
- * @param {Number} id mã người dùng
- * @param {{email: String?, 
-* phone: String?, fullName: String?, 
-* role: String?, createdAt: Date?, 
-* updatedAt: Date?}} attributes
-* 
-* @param {function(Error?)?} callback (error)  
-*/
-const upsert = async (id, attributes, callback, transaction) => {
+const validateEmail = async (email, callback) => {
     try {
-        const { email, phone, fullName, role } = attributes;
+        let err;
+        if (!validator.isEmail(email))
+            err = new CustomError('InvalidEmailError');
 
-        const data = {
-            ...(email && { email: email }),
-            ...(phone && { phone: phone }),
-            ...(fullName && { fullName: fullName }),
-            ...(role && { role: role }),
-        };
+        const count = await User.countDocuments({ email });
+        if (count > 0) err = new CustomError('ExistingEmailError');
 
-        if (id) {
-            const [updatedCount] = await db.User.update(data, {
-                where: { id: id }, transaction: transaction
-            });
-            if (callback) return callback(null, updatedCount);
-            return updatedCount;
-        }
-        else {
-            const user = await db.User.create(data, { transaction: transaction });
-            if (callback) return callback(null, user);
-            return user;
-        }
+        if (callback) return callback(err)
     }
     catch (err) {
-        if (callback) return callback(err, null);
+        if (callback) return callback(err);
         throw err;
     }
 }
 
-const findOne = async (id, exclude, callback) => {
+const validatePhone = async (phone, callback) => {
     try {
-        const user = await db.User.findByPk(id, {
-            attributes: {
-                exclude: Array.isArray(exclude) ? [...exclude, 'password'] : [exclude && exclude, 'password']
-            }
-        });
+        let err;
+        if (!validator.isMobilePhone(phone, 'any'))
+            err = new CustomError('InvalidPhoneError');
+
+        const count = await User.countDocuments({ phone });
+        if (count > 0) err = new CustomError('ExistingPhoneError');
+
+        if (callback) return callback(err)
+    }
+    catch (err) {
+        if (callback) return callback(err);
+        throw err;
+    }
+}
+
+const create = async (attributes, callback, session) => {
+    try {
+        attributes.password = await bcrypt.hash(attributes.password, +process.env.SALT_LENGTH);
+        let user = new User(attributes);
+        await user.save({ session });
+
+        user = user.toObject();
+        delete user.password;
+        delete user.__v;
 
         if (callback) return callback(null, user);
         return user;
@@ -58,61 +57,68 @@ const findOne = async (id, exclude, callback) => {
     }
 }
 
-/**
- * Tìm người dùng
- * @param {{id: Number | [Number, Boolean], email: String | [String, Boolean], 
- * phone: String ! [String, Boolean], fullName: String | [String, Boolean], 
- * role: String | [String | Boolean], createdAt: Date | [Date, Date], 
- * updatedAt: Date | [Date, Date], order: [{by: String, type: String}]?}} conditions 
- * điều kiện tìm (mặc định là tìm chính xác có thể sử dụng 'key: value' hoặc 'key: [value, true]'). 
- * Tìm gần đúng bằng cách sử dụng 'key :[value, false]'
- * 
- * @param {Number} page số trang
- * @param {Number} limit số lượng bản ghi tối đa trả về
- * @param {function([]?, Error?)?} callback (userInfosList, error)
-* @returns {Promise<[]> | void}
- */
-const findAll = async (conditions, page = 1, limit = 10, callback) => {
+const update = async (_id, attributes, callback, session) => {
     try {
-        const { id, email, phone, fullName, role, createdAt, updatedAt, order } = conditions || {};
+        attributes.password = await bcrypt.hash(attributes.password, +process.env.SALT_LENGTH);
+        const user = await User.findOneAndUpdate(
+            { _id: _id },
+            { $set: attributes },
+            { new: true, session }
+        ).select('-__v -password');
 
-        const where = {
-            ...(id && (Array.isArray(id) ? (typeof id[1] === 'string' ? { id: { [Op[id[1]]]: id } }
-                : { id: { [Op.between]: [id[0], id[1]] } }) : { id: id })),
+        if (callback) return callback(null, user);
+        return user;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
+        throw err;
+    }
+}
 
-            ...(email && (Array.isArray(email) ? (email[1] === true ? { email: email[0] }
-                : { email: { [Op.and]: [Sequelize.where(Sequelize.fn('search_string', Sequelize.col('email'), email[0]), true)] } })
-                : { email: email })),
+const findOne = async (_id, exclude, callback) => {
+    try {
+        const user = (await findAll({ _id: _id }, null, exclude))[0];
+        if (callback) return callback(null, user);
+        return user;
+    }
+    catch (err) {
+        if (callback) return callback(err, null);
+        throw err;
+    }
+}
 
-            ...(phone && (Array.isArray(phone) ? (phone[1] === true ? { phone: phone[0] }
-                : { phone: { [Op.and]: [Sequelize.where(Sequelize.fn('search_string', Sequelize.col('phone'), phone[0]), true)] } })
-                : { phone: phone })),
+const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback) => {
+    try {
+        const { keyword, _id, email, phone, fullName, role } = criteria || {};
+        const query = User.find({
+            ...(_id && { _id: Array.isArray(_id) ? { $regex: _id[0], $options: _id.length > 1 ? _id[1] : 'i' } : new mongoose.Types.ObjectId(_id) }),
+            ...(email && { email: Array.isArray(email) ? { $regex: email[0], $options: email.length > 1 ? email[1] : 'i' } : email }),
+            ...(phone && { phone: Array.isArray(phone) ? { $regex: phone[0], $options: phone.length > 1 ? phone[1] : 'i' } : phone }),
+            ...(fullName && { fullName: Array.isArray(fullName) ? { $regex: fullName[0], $options: fullName.length > 1 ? fullName[1] : 'i' } : fullName }),
+            ...(role && { role: Array.isArray(role) ? { $regex: role[0], $options: role.length > 1 ? role[1] : 'i' } : role }),
 
-            ...(fullName && (Array.isArray(fullName) ? (fullName[1] === true ? { fullName: fullName[0] }
-                : { fullName: { [Op.and]: [Sequelize.where(Sequelize.fn('search_string', Sequelize.col('fullName'), fullName[0]), true)] } })
-                : { fullName: fullName })),
+            ...(keyword && {
+                $text: {
+                    $search: keyword,
+                    $caseSensitive: false,
+                    $diacriticSensitive: false
+                }
+            })
+        })
+            .sort(order || { _id: 1 })
+            .skip((page - 1) * limit)
+            .limit(+limit);
 
-            ...(role && { role: role }),
+        if (Array.isArray(exclude) && exclude.length > 0) {
+            query.select(`-${exclude.join(' -')}`);
+        }
+        else if (exclude) {
+            query.select(`-${exclude}`);
+        }
+        query.select('-password -__v');
 
-            ...(createdAt && (Array.isArray(createdAt) ? (typeof createdAt[1] === 'string'
-                ? { createdAt: { [Op[createdAt[1]]]: createdAt } }
-                : { createdAt: { [Op.between]: [createdAt[0], createdAt[1]] } }) : { createdAt: createdAt })),
-
-            ...(updatedAt && (Array.isArray(updatedAt) ? (typeof updatedAt[1] === 'string'
-                ? { updatedAt: { [Op[updatedAt[1]]]: updatedAt } }
-                : { updatedAt: { [Op.between]: [updatedAt[0], updatedAt[1]] } }) : { updatedAt: updatedAt })),
-        };
-
-        const users = await db.User.findAll({
-            attributes: { exclude: ['password'] }, // Không trả về password
-            where: where,
-            order: order || [['id', 'ASC']],
-            offset: (page - 1) * limit,
-            limit: +limit,
-            raw: true
-        });
-
-        if (callback) callback(null, users);
+        const users = await query;
+        if (callback) return callback(null, users);
         return users;
     }
     catch (err) {
@@ -121,20 +127,12 @@ const findAll = async (conditions, page = 1, limit = 10, callback) => {
     }
 }
 
-/**
- * Xoá người dùng hoặc xoá một loạt người dùng
- * @param {[Number] | Number} ids mã của người dùng hoặc danh sách của mã người dùng 
- * @param {function(Error?)} callback
- * @returns {Promise<void> | void} 
- */
-const destroy = async (ids, callback, transaction) => {
+const destroy = async (ids, callback, session) => {
     try {
-        const deleted = await db.User.destroy({
-            where: { id: ids }
-        }, { transaction: transaction });
-
-        if (callback) return callback(null, deleted);
-        return deleted;
+        const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);
+        const result = await User.deleteMany({ _id: { $in: _ids } }, { session });
+        if (callback) return callback(null, result);
+        else return result;
     }
     catch (err) {
         if (callback) return callback(err, null);
@@ -143,8 +141,11 @@ const destroy = async (ids, callback, transaction) => {
 }
 
 export default {
-    upsert,
+    validateEmail,
+    validatePhone,
+    create,
     findOne,
     findAll,
+    update,
     destroy
 }

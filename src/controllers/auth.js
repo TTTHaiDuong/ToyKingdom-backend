@@ -1,43 +1,8 @@
-import authServices from '../mongo-services/auth.js';
-import passwordServices from '../mongo-services/password.js';
-import tokenServices from '../mongo-services/token.js';
-import sendEmail from '../services/send-email.js';
-import validator from 'validator';
-import CustomError from '../mongo-services/custom-error.js';
-import { User } from '../models.js';
-
-const validateRegisterInfo = async ({ email, phone }, callback) => {
-    try {
-        if (!email && !phone) {
-            if (callback) return callback(['Missing email or phone']);
-            return ['Missing email or phone'];
-        }
-
-        const errors = [];
-
-        if (email && !validator.isEmail(email)) errors.push('Invalid email');
-        if (phone && !validator.isMobilePhone(phone, 'any')) errors.push('Invalid phone');
-
-        const existing = await User.findOne({
-            ...(email && { email: email }),
-            ...(phone && { phone: phone })
-        });
-        console.log(existing)
-
-        if (existing) {
-            if (email && email === existing.email) errors.push('Existing email');
-            if (phone && phone === existing.phone) errors.push('Existing phone');
-        }
-
-        const result = errors.length !== 0 ? errors : null;
-        if (callback) return callback(null, result);
-        return result;
-    }
-    catch (err) {
-        if (callback) return callback(err, null);
-        throw err;
-    }
-}
+import authSv from '../services/auth.js';
+import passwordSv from '../services/password.js';
+import tokenSv from '../services/token.js';
+import sendEmail from '../old-services/send-email.js';
+import CustomError from '../services/custom-error.js';
 
 const login = async (req, res) => {
     const { email, phone, password } = req.body;
@@ -45,12 +10,12 @@ const login = async (req, res) => {
     if (!email && !phone) return res.status(400).json({ message: 'Missing email or phone' });
     if (!password) return res.status(400).json({ message: 'Missing password' });
 
-    authServices.login({ email, phone }, password, (err, tokenPair) => {
+    authSv.login({ email, phone }, password, (err, tokenPair) => {
         if (err) {
-            if (err instanceof CustomError && err.paramInfo.variable === 'emailOrPhone')
+            if (err instanceof CustomError && err.name === 'UserNotFoundError')
                 return res.status(404).json({ message: `Not existing ${email ? 'email' : 'phone'}` });
 
-            if (err instanceof CustomError && err.paramInfo.variable === 'password')
+            if (err instanceof CustomError && err.name === 'IncorrectPasswordError')
                 return res.status(401).json({ message: 'Incorrect password' });
 
             return res.status(500).json({ message: 'Server error' });
@@ -62,7 +27,7 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     const { id } = req.tokenPayload;
 
-    authServices.logout(id, (err) => {
+    authSv.logout(id, (err) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ message: 'Ok' });
     });
@@ -74,7 +39,7 @@ const signup = async (req, res) => {
     const invalid = await validateRegisterInfo({ email, phone });
     if (invalid) return res.status(400).json({ invalidStack: invalid, message: 'Invalid email or phone' });
 
-    authServices.signup(email, phone, fullName, password, (err, user) => {
+    authSv.signup(email, phone, fullName, password, (err, user) => {
         if (err) {
             if (err instanceof CustomError && err.paramInfo.variable === 'password')
                 return res.status(400).json({ message: 'Missing password' });
@@ -89,10 +54,10 @@ const changePassword = async (req, res) => {
     const { id } = req.tokenPayload;
     const { oldPassword, newPassword } = req.body;
 
-    const isVerified = await passwordServices.verify(id, oldPassword);
+    const isVerified = await passwordSv.verify(id, oldPassword);
     if (!isVerified) return res.status(401).json({ message: 'Incorrect old password' });
 
-    passwordServices.generate(id, newPassword, (err) => {
+    passwordSv.generate(id, newPassword, (err) => {
         if (err) {
             if (err instanceof CustomError && err.paramInfo.variable === 'password')
                 return res.status(400).json({ message: 'Missing new password' });
@@ -107,7 +72,7 @@ const refreshAccessToken = async (req, res) => {
     const authHeader = req.headers['x-refresh-token'];
     const refreshToken = authHeader && authHeader.split(' ')[1];
 
-    tokenServices.refreshAccessToken(refreshToken, (err, accessToken) => {
+    tokenSv.refreshAccessToken(refreshToken, (err, accessToken) => {
         if (err) {
             if (err instanceof CustomError && err.paramInfo.variable === 'tokenPair')
                 return res.status(400).json({ message: 'Missing refresh token' });
@@ -130,7 +95,6 @@ let requestOtpVieEmail = async (req, res) => {
 }
 
 export default {
-    validateRegisterInfo,
     login,
     logout,
     signup,

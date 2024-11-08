@@ -1,4 +1,4 @@
-import productImageServices from '../mongo-services/product-image.js';
+import productImageServices from '../services/product-image.js';
 
 const create = async (req, res) => {
     const { productId, order, altText } = req.body;

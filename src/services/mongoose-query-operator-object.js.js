@@ -1,4 +1,4 @@
-const toQueryObject = (array) => {
+const toQueryOperatorObject = (array) => {
     const result = {};
 
     for (let i = 0; i < array.length; i += 2) {
@@ -10,4 +10,4 @@ const toQueryObject = (array) => {
     return result;
 }
 
-export default toQueryObject;
+export default toQueryOperatorObject;

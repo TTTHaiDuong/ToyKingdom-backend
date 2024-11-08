@@ -1,6 +1,17 @@
 import bcrypt from 'bcryptjs';
-import db from '../models/index.js';
 import CustomError from './custom-error.js';
+import { User } from '../models.js';
+import 'dotenv/config';
+
+const isValid = (password, callback) => {
+    if (!password || password === '') {
+        const err = new CustomError('EmptyPasswordError');
+
+        if (callback) return callback(err);
+        throw err;
+    }
+    if (callback) return callback(null);
+}
 
 /**
  * 
@@ -9,30 +20,17 @@ import CustomError from './custom-error.js';
  * @param {function(Error?)?} callback 
  * @returns {Promise<void>}
  */
-const generate = async (userId, password, callback, transaction) => {
+const generate = async (userId, password, callback, session) => {
     try {
-        if (!password || password === '') {
-            const err = new CustomError('EmptyPasswordError',
-                ['paramInfo', { variable: 'password' }]);
-            if (callback) return callback(err);
-            throw err;
-        }
-
+        isValid(password);
         // Băm mật khẩu
-        const hashedPass = await bcrypt.hash(password, +process.env.SALT_LENGTH);
-
+        const hashed = await bcrypt.hash(password, +process.env.SALT_LENGTH);
         // Cập nhật vào bản ghi
-        const [updatedCount] = await db.User.update({
-            password: hashedPass
-        }, {
-            where: { id: userId },
-            transaction: transaction
-        });
+        const updated = await User.updateOne({ _id: userId }, { password: hashed }, { session });
 
         // Nếu không có bản ghi nào được cập nhật
-        if (updatedCount == 0) {
-            const err = new CustomError('NoPasswordUpdatedError',
-                ['paramInfo', { variable: 'userId' }]);
+        if (updated.modifiedCount === 0) {
+            const err = new CustomError('NoPasswordUpdatedError');
             if (callback) return callback(err);
             throw err;
         }
@@ -53,12 +51,11 @@ const generate = async (userId, password, callback, transaction) => {
  */
 const verify = async (userId, password, callback) => {
     try {
-        const user = await db.User.findByPk(userId);
+        const user = await User.findById(userId);
 
         // Nếu người dùng không tồn tại
         if (!user) {
-            const err = new CustomError('UserNotFoundError',
-                ['paramInfo', { variable: 'userId' }]);
+            const err = new CustomError('UserNotFoundError');
             if (callback) return callback(err, null);
             throw err;
         }
@@ -83,6 +80,7 @@ const verify = async (userId, password, callback) => {
 }
 
 export default {
+    isValid,
     generate,
     verify
 }

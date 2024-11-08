@@ -1,18 +1,28 @@
 import CustomError from './custom-error.js';
+import db from '../old-models/index.js';
 import 'dotenv/config';
 import passwordServices from './password.js';
 import tokenServices from './token.js';
 import userServices from './user.js';
-import { Token, User } from '../models.js';
 
+/**
+ * Đăng nhập bằng email hoặc số điện thoại và mật khẩu
+ * @param {{email: String?, phone: String?}} emailOrPhone email, số điện thoại của người dùng
+ * @param {String} password mật khẩu
+ * @param {function({accessToken: String, refreshToken: String}?, Error?)?} callback (tokenPair, error)
+ * @return {Promise<{accessToken: String, refreshToken: String}>}
+ */
 const login = async (emailOrPhone, password, callback) => {
     try {
         const { email, phone } = emailOrPhone;
 
         // Tìm người dùng phù hợp với email hoặc số điện thoại trong CSDL
-        const user = await User.findOne({
-            ...(email && { email }),
-            ...(phone && { phone })
+        const user = await db.User.findOne({
+            where: {
+                ...(email && { email }),
+                ...(phone && { phone })
+            },
+            raw: true
         });
 
         // Nếu như người dùng không tồn tại
@@ -24,9 +34,9 @@ const login = async (emailOrPhone, password, callback) => {
         }
 
         // Kiểm tra mật khẩu
-        const payload = { _id: user._id.toString(), role: user.role };
+        const payload = { id: user.id, role: user.role };
 
-        const result = await passwordServices.verify(payload._id, password);
+        const result = await passwordServices.verify(payload.id, password);
         if (!result) {
             const err = new CustomError('IncorrectPasswordError',
                 ['paramInfo', { variable: 'password' }]);
@@ -57,12 +67,12 @@ const login = async (emailOrPhone, password, callback) => {
 const logout = async (userId, callback) => {
     try {
         // Xoá bản ghi chứa access token hoặc refresh token
-        const deleted = await Token.deleteOne({
-            userId: userId
+        const deletedCount = await db.LoginToken.destroy({
+            where: { userId }
         });
 
         // Nếu login token chưa được thu hồi
-        if (deleted === 0) {
+        if (deletedCount === 0) {
             const err = new CustomError('UnrevokedLoginTokenError',
                 ['paramInfo', { variable: 'userId' }]);
             if (callback) return callback(err);
@@ -78,12 +88,19 @@ const logout = async (userId, callback) => {
 }
 
 const signup = async (email, phone, fullName, password, callback) => {
+    const transaction = await db.sequelize.transaction();
     try {
-        const created = await userServices.upsert(null, { email, phone, password, fullName, role: 'user' });
+        const created = await userServices.upsert(null, { email, phone, fullName, role: 'user' }, null, transaction);
+        await passwordServices.generate(created.id, password, null, transaction);
+
+        await transaction.commit();
+
+        created.password = undefined;
         if (callback) return callback(null, created);
         return created;
     }
     catch (err) {
+        await transaction.rollback();
         if (callback) return callback(err, null)
         throw err;
     }

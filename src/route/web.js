@@ -1,9 +1,9 @@
 import express from 'express';
-import authController from '../controllers/auth.js';
-import userController from '../controllers/user.js';
-import productController from '../controllers/product.js';
-import productImageController from '../controllers/product-image.js';
-import cartController from '../controllers/cart.js';
+import authCtl from '../controllers/auth.js';
+import cartCtl from '../controllers/cart.js';
+import productCtl from '../controllers/product.js';
+import productImageCtl from '../controllers/product-image.js';
+import userCtl from '../controllers/user.js';
 import passport from '../middlewares/passport.js';
 import upload from '../middlewares/image-upload.js';
 
@@ -37,14 +37,14 @@ const initPublicRoutes = (parentRouter) => {
         return res.status(200).json({ message: 'Welcome to Toykingdom Server' })
     });
 
-    router.post('/login', authController.login);
-    router.post('/signup', authController.signup);
-    router.post('/access/refresh', authController.refreshAccessToken);
+    router.post('/login', authCtl.login);
+    router.post('/signup', authCtl.signup);
+    router.post('/access/refresh', authCtl.refreshAccessToken);
 
-    router.get('/product/findOne', productController.findOne);
-    router.get('/product/findAll', productController.findAll);
+    router.get('/product/findOne', productCtl.findOne);
+    router.get('/product/findAll', productCtl.findAll);
 
-    router.get('/product/image/find', productImageController.find);
+    router.get('/product/image/find', productImageCtl.find);
 
     return parentRouter.use('/', router);
 }
@@ -53,10 +53,10 @@ const initPublicRoutes = (parentRouter) => {
 const initUserRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.post('/cart/create', cartController.create);
-    router.get('/cart/find', cartController.findByUser);
-    router.put('/cart/update', cartController.update);
-    router.delete('/cart/delete', cartController.destroy);
+    router.post('/cart/create', cartCtl.create);
+    router.get('/cart/find', cartCtl.findByUser);
+    router.put('/cart/update', cartCtl.update);
+    router.delete('/cart/delete', cartCtl.destroy);
 
     return parentRouter.use('/user', router);
 }
@@ -65,20 +65,20 @@ const initUserRoutes = (parentRouter) => {
 const initAdminRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.get('/user/findOne', userController.findOne);
-    router.get('/user/findAll', userController.findAll);
-    router.put('/user/update', userController.update);
-    router.delete('/user/delete', userController.destroy);
+    router.get('/user/findOne', userCtl.findOne);
+    router.get('/user/findAll', userCtl.findAll);
+    router.put('/user/update', userCtl.update);
+    router.delete('/user/delete', userCtl.destroy);
 
-    router.post('/product/create', productController.create);
-    router.get('/product/findOne', productController.findOne);
-    router.get('/product/findAll', productController.findAll);
-    router.put('/product/update', productController.update);
-    router.delete('/product/delete', productController.destroy);
+    router.post('/product/create', productCtl.create);
+    router.get('/product/findOne', productCtl.findOne);
+    router.get('/product/findAll', productCtl.findAll);
+    router.put('/product/update', productCtl.update);
+    router.delete('/product/delete', productCtl.destroy);
 
-    router.post('/product/image/create', upload.single('image'), productImageController.create);
-    router.put('/product/image/update', upload.single('image'), productImageController.update);
-    router.delete('/product/image/delete', productImageController.destroy);
+    router.post('/product/image/create', upload.single('image'), productImageCtl.create);
+    router.put('/product/image/update', upload.single('image'), productImageCtl.update);
+    router.delete('/product/image/delete', productImageCtl.destroy);
 
     return parentRouter.use('/admin', router);
 }
@@ -94,10 +94,10 @@ const initOwnerRoutes = (parentRouter) => {
 const initRegisteredRoutes = (parentRouter) => {
     const router = express.Router();
 
-    router.delete('/logout', authController.logout);
-    router.put('/password/update', authController.changePassword);
+    router.delete('/logout', authCtl.logout);
+    router.put('/password/update', authCtl.changePassword);
 
-    router.get('/profile', userController.findOne);
+    router.get('/profile', userCtl.findOne);
 
     return parentRouter.use('/registered', router);
 }

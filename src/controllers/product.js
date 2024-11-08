@@ -1,9 +1,9 @@
-import productServices from '../mongo-services/product.js';
+import productServices from '../services/product.js';
 
 const create = async (req, res) => {
     const { attributes } = req.body;
 
-    productServices.upsert(null, attributes, (err, product) => {
+    productServices.create(attributes, (err, product) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ created: product });
     });
@@ -40,7 +40,7 @@ const update = async (req, res) => {
 
     if (!_id) return res.status(400).json({ message: 'Missing _id' });
 
-    productServices.upsert(_id, attributes, null, (err, updated) => {
+    productServices.update(_id, attributes, null, (err, updated) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ message: 'Ok' });
     });

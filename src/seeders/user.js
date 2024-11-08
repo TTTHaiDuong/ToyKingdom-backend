@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import 'dotenv/config';
 
 const up = async () => {
-    const users = [
+    const data = [
         {
             _id: new mongoose.Types.ObjectId('672d0521d53c3cc9ba4d568c'),
             email: 'owner@example.com',
@@ -63,7 +63,7 @@ const up = async () => {
         }
     ]
 
-    await User.create(users);
+    await User.create(data);
 }
 
 const down = async () => {

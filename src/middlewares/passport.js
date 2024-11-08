@@ -1,4 +1,4 @@
-import tokenServices from '../mongo-services/token.js';
+import tokenServices from '../services/token.js';
 
 /** Danh sách quyền của các vai trò */
 const userRoles = {
@@ -15,6 +15,7 @@ const userRoles = {
  * @param {function(Error)} callback (error) 
  */
 const checkRole = (role) => async (req, res, next) => {
+    next();
     const authHeader = req.headers['authorization'];
     const accessToken = authHeader && authHeader.split(' ')[1];
 

@@ -2,7 +2,7 @@ import { SoldProduct } from "../models.js";
 import mongoose from "mongoose";
 
 const up = async () => {
-    const soldProducts = [
+    const data = [
         {
             productId: '672cf37d408d47bba322d8e6',
             userId: '672d0521d53c3cc9ba4d568e',
@@ -61,7 +61,7 @@ const up = async () => {
         }
     ]
 
-    await SoldProduct.create(soldProducts);
+    await SoldProduct.create(data);
 }
 
 const down = async () => {
