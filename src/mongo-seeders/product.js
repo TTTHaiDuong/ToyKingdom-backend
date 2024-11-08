@@ -7,7 +7,7 @@ const up = async () => {
             // 1
             _id: new mongoose.Types.ObjectId('672cf21818c76bacb3ae7440'),
             name: 'Xe điều khiển 1:24 Lamborghini Aventador SVJ màu Vàng RASTAR R96100',
-            categories: ['Xe điều khiển'],
+            category: 'Đồ chơi cầm tay',
 
             discount: null,
             price: 479000,
@@ -41,7 +41,7 @@ const up = async () => {
             // 2
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8e4'),
             name: 'Đồ chơi trực thăng Avatar VECTO VTYD-718',
-            categories: ['Trực thăng'],
+            category: 'Đồ chơi cầm tay',
 
             discount: null,
             price: 999000,
@@ -71,7 +71,7 @@ const up = async () => {
             // 3
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8e5'),
             name: 'Đồ chơi lắp ráp Rồng nguyên tố đối đầu chiến giáp đế vương LEGO NINJAGO 71796',
-            categories: ['Đồ chơi lắp ghép'],
+            category: 'Đồ chơi Lego',
 
             discount: null,
             price: 2309000,
@@ -117,7 +117,7 @@ const up = async () => {
             // 4
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8e6'),
             name: 'Đồ chơi lắp ráp Tàu thám hiểm bắc cực LEGO CITY 60368',
-            categories: ['Đồ chơi lắp ghép'],
+            category: 'Đồ chơi Lego',
 
             discount: null,
             price: 3275000,
@@ -163,7 +163,7 @@ const up = async () => {
             // 5
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8e7'),
             name: 'Vali nhà bếp di động 3 trong 1 SWEET HEART SH8121',
-            categories: ['Đồ chơi lắp ghép', 'Đồ chơi nhà bếp'],
+            category: 'Đồ chơi cầm tay',
 
             discount: null,
             price: 659000,
@@ -201,7 +201,7 @@ const up = async () => {
             // 6
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8e8'),
             name: 'Bộ đồ chơi bác sĩ BATTAT BT2537Z',
-            categories: ['Đồ chơi bác sĩ'],
+            category: 'Đồ chơi cầm tay',
 
             discount: null,
             price: 439000,
@@ -235,7 +235,7 @@ const up = async () => {
             // 7
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8e9'),
             name: 'Thú nhồi bông Mũ phù thủy ánh sao AMONG US AMU10910',
-            categories: ['Thú bông'],
+            category: 'Đồ chơi cầm tay',
 
             discount: null,
             price: 329000,
@@ -261,7 +261,7 @@ const up = async () => {
             // 8
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ea'),
             name: 'Chim Cánh Cụt Con IWAYA 3243-1VN/JS',
-            categories: ['Thú bông'],
+            category: 'Đồ chơi cầm tay',
 
             discount: null,
             price: 399000,
@@ -287,7 +287,7 @@ const up = async () => {
             // 9
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8eb'),
             name: 'Bàn chơi Khúc Côn Cầu UNITED SPORT A6030',
-            categories: ['Đồ chơi vận động'],
+            category: 'Khác',
 
             discount: null,
             price: 834000,
@@ -321,7 +321,7 @@ const up = async () => {
             // 10
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ec'),
             name: 'Bàn chơi Bi Lắc UNITED SPORT A6026',
-            categories: ['Đồ chơi vận động'],
+            category: 'Khác',
 
             discount: null,
             price: 834000,
@@ -350,7 +350,7 @@ const up = async () => {
             // 11
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ed'),
             name: 'Xe đạp trẻ em Royal Baby Flying Bear 16 inch Màu Vàng RB16B-9',
-            categories: ['Xe đạp'],
+            category: 'Khác',
             discount: null,
 
             price: 3114000,
@@ -379,7 +379,7 @@ const up = async () => {
             // 12
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ee'),
             name: 'Xe đạp trẻ em Royal Baby Freestyle 18 inch Màu Đỏ RB18B-6',
-            categories: ['Xe đạp'],
+            category: 'Khác',
             discount: null,
             price: 3018000,
             stock: 20,
@@ -407,7 +407,7 @@ const up = async () => {
             // 13
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8ef'),
             name: 'Patin Neon Inline Yvolution xanh dương NT07B4-size 4-7 tuổi',
-            categories: ['Đồ chơi vận động'],
+            category: 'Khác',
             discount: null,
 
             price: 1521000,
@@ -440,7 +440,7 @@ const up = async () => {
             // 14
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f0'),
             name: 'Xe Scooter 2 bánh Neon Vector Yvolution NT05B2 xanh dương',
-            categories: ['Đồ chơi vận động'],
+            category: 'Khác',
             discount: null,
 
             price: 1279000,
@@ -477,7 +477,7 @@ const up = async () => {
             // 15
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f1'),
             name: 'Đồ chơi Robot bạch tuộc 3 chân điều khiển từ xa (đen) VECTO VT6035',
-            categories: ['Đồ chơi lắp ghép', 'Robot'],
+            category: 'Đồ chơi cầm tay',
             discount: null,
 
             price: 600000,
@@ -502,7 +502,7 @@ const up = async () => {
             // 16
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f2'),
             name: 'Siêu Robot biến hình TOBOT CYCLONE HAWK thủ lĩnh bầu trời TOBOT 301110',
-            categories: ['Đồ chơi lắp ghép', 'Robot'],
+            category: 'Đồ chơi cầm tay',
             discount: null,
 
             price: 699000,
@@ -531,7 +531,7 @@ const up = async () => {
             // 17
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f3'),
             name: 'Xe tập đi 3 trong 1 PEEK A BOO EU461542',
-            categories: ['Đồ chơi sơ sinh', 'Đồ chơi giáo dục'],
+            category: 'Khác',
             discount: null,
 
             price: 1189000,
@@ -564,7 +564,7 @@ const up = async () => {
             // 18
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f4'),
             name: 'Đồ chơi nhận dạng hình khối FISHER PRICE MATTEL FFC84',
-            categories: ['Đồ chơi giáo dục'],
+            category: 'Đồ chơi cầm tay',
             discount: null,
 
             price: 299000,
@@ -593,7 +593,7 @@ const up = async () => {
             // 19
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f5'),
             name: 'Đồ Chơi Lắp Ráp Bộ Sưu Tập Hoa Xương Rồng LEGO BOTANICALS 10329 (758 chi tiết)',
-            categories: ['Đồ chơi lắp ghép'],
+            category: 'Đồ chơi Lego',
             discount: null,
 
             price: 1147000,
@@ -634,7 +634,7 @@ const up = async () => {
             // 20
             _id: new mongoose.Types.ObjectId('672cf37d408d47bba322d8f6'),
             name: 'Đồ Chơi Lắp Ráp Hoa Khô Trang Trí Lego LEGO BOTANICALS 10314 (812 chi tiết)',
-            categories: ['Đồ chơi lắp ghép'],
+            category: 'Đồ chơi Lego',
             discount: null,
 
             price: 983000,

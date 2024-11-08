@@ -10,7 +10,7 @@ module.exports = {
             /* 2*/ { name: 'Xe điều khiển' },
             /* 3*/ { name: 'Đồ chơi lắp ghép' },
             /* 4*/ { name: 'Trực thăng' },
-            /* 5*/ { name: 'Đồ chơi sơ sinh' },
+            /* 5*/ { name: 'Đồ chơi sơ sinh' }, // Đồ chơi Lego // Đồ chơi cầm tay // Khác
             /* 6*/ { name: 'Xe đạp' },
             /* 7*/ { name: 'Đồ chơi nhà bếp' },
             /* 8*/ { name: 'Đồ chơi bác sĩ' },
