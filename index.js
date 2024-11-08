@@ -12,7 +12,7 @@ let app = express();
 
 // // Option1: Development
 // Cho phép bất kỳ nguồn nào truy cập đến server
-// app.use(cors({ origin: true }));
+app.use(cors({ origin: true }));
 
 // // Option2: Production
 // const allowedOrigins = [];
