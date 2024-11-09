@@ -29,7 +29,7 @@ initWebRouters(app); // Khởi tạo router
 
 connectDB();
 
-seeder.update();
+// seeder.update();
 
 // Chạy server
 app.listen(+process.env.PORT, () => {
