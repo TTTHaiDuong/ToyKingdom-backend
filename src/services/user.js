@@ -47,6 +47,7 @@ const create = async (attributes, callback, session) => {
         await user.save({ ...(session && { session }) });
 
         user = user.toObject();
+        user._id = user._id.toString();
         delete user.password;
         delete user.__v;
 
@@ -68,6 +69,7 @@ const update = async (_id, attributes, callback, session) => {
             { $set: attributes },
             { new: true, ...(session && { session }) }
         ).select('-__v -password');
+        user._id = user_id.toString();
 
         if (callback) return callback(null, user);
         return user;

@@ -13,15 +13,17 @@ const router = express.Router();
 /** Khởi tạo tất cả đường dẫn */
 const initWebRouters = (app) => {
 
-    router.all('*', checkPermission);
+    router.all('*', checkPermission); // Kiểm tra quyền truy cập trước khi xử lý các route
 
-    initPublicRoutes(router);
-    initUserRoutes(router);
-    initAdminRoutes(router);
-    initOwnerRoutes(router);
-    initRegisteredRoutes(router);
+    initPublicRoutes(router); // Khởi tạo đường dẫn công cộng (public routes)
+    initUserRoutes(router); // Khởi tạo đường dẫn dành cho user
+    initAdminRoutes(router); // Khởi tạo đường dẫn dành cho admin
+    initOwnerRoutes(router); // Khởi tạo đường dẫn dành cho owner
+    initRegisteredRoutes(router); // Khởi tạo đường dẫn dành cho registered users
 
-    app.use('/', router);
+    app.use('/', router); // Sử dụng router với tất cả các route đã định nghĩa
+
+    // Xử lý các trường hợp không tìm thấy route
     app.use((req, res) => {
         return res.status(404).json({
             path: req.path,
@@ -39,13 +41,16 @@ const initPublicRoutes = (parentRouter) => {
         return res.status(200).json({ message: 'Welcome to Toykingdom Server' })
     });
 
+    // Chức năng cơ bản như đăng nhập, đăng ký
     router.post('/login', authCtl.login);
     router.post('/signup', authCtl.signup);
     router.post('/access/refresh', authCtl.refreshAccessToken);
 
+    // Chức năng liên quan đến tìm kiếm sản phẩm
     router.get('/product/findOne', productCtl.findOne);
     router.get('/product/findAll', productCtl.findAll);
 
+    // Chức năng lấy hình ảnh sản phẩm
     router.get('/product/image/find', productImageCtl.find);
     router.get('/product/review/findAll', productReviewCtl.findAll);
 
@@ -56,10 +61,12 @@ const initPublicRoutes = (parentRouter) => {
 const initUserRoutes = (parentRouter) => {
     const router = express.Router();
 
+    // Chức năng chỉnh sửa giỏ hàng
     router.post('/cart/create', cartCtl.create);
     router.get('/cart/find', cartCtl.findByUser);
     router.delete('/cart/delete', cartCtl.destroy);
 
+    // Chức năng chỉnh sửa review
     router.post('/product/review/create', productReviewCtl.create);
     router.put('/product/review/update', productReviewCtl.update);
 
