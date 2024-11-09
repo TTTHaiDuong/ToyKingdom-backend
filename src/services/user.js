@@ -61,7 +61,8 @@ const create = async (attributes, callback, session) => {
 
 const update = async (_id, attributes, callback, session) => {
     try {
-        attributes.password = await bcrypt.hash(attributes.password, +process.env.SALT_LENGTH);
+        const { password } = attributes;
+        if (password) attributes.password = await bcrypt.hash(password, +process.env.SALT_LENGTH);
         const user = await User.findOneAndUpdate(
             { _id: _id },
             { $set: attributes },

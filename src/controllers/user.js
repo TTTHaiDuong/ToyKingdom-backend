@@ -30,8 +30,8 @@ const findAll = (req, res) => {
 
 const update = async (req, res) => {
     const { _id, attributes } = req.body;
-    const userId = req.tokenPayload._id;
-    const { role } = req.tokenPayload;
+    // const userId = req.tokenPayload._id;
+    // const { role } = req.tokenPayload;
     const { email, phone } = attributes;
 
     delete attributes.password;

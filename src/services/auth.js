@@ -55,14 +55,13 @@ const login = async (emailOrPhone, password, callback) => {
 const logout = async (userId, callback) => {
     try {
         // Xoá bản ghi chứa access token hoặc refresh token
-        const deleted = await Token.deleteOne({
+        const result = await Token.deleteOne({
             userId: userId
         });
 
         // Nếu login token chưa được thu hồi
-        if (deleted === 0) {
-            const err = new CustomError('UnrevokedLoginTokenError',
-                ['paramInfo', { variable: 'userId' }]);
+        if (result.deletedCount === 0) {
+            const err = new CustomError('UnrevokedLoginTokenError');
             if (callback) return callback(err);
             throw err;
         }

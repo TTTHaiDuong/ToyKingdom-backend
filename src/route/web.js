@@ -3,6 +3,7 @@ import authCtl from '../controllers/auth.js';
 import cartCtl from '../controllers/cart.js';
 import productCtl from '../controllers/product.js';
 import productImageCtl from '../controllers/product-image.js';
+import productReviewCtl from '../controllers/product-review.js';
 import userCtl from '../controllers/user.js';
 import passport from '../middlewares/passport.js';
 import upload from '../middlewares/image-upload.js';
@@ -13,10 +14,11 @@ const router = express.Router();
 const initWebRouters = (app) => {
 
     router.all('*', checkPermission);
+
     initPublicRoutes(router);
     initUserRoutes(router);
     initAdminRoutes(router);
-    // initOwnerRoutes(router);
+    initOwnerRoutes(router);
     initRegisteredRoutes(router);
 
     app.use('/', router);
@@ -45,6 +47,7 @@ const initPublicRoutes = (parentRouter) => {
     router.get('/product/findAll', productCtl.findAll);
 
     router.get('/product/image/find', productImageCtl.find);
+    router.get('/product/review/findAll', productReviewCtl.findAll);
 
     return parentRouter.use('/', router);
 }
@@ -56,6 +59,9 @@ const initUserRoutes = (parentRouter) => {
     router.post('/cart/create', cartCtl.create);
     router.get('/cart/find', cartCtl.findByUser);
     router.delete('/cart/delete', cartCtl.destroy);
+
+    router.post('/product/review/create', productReviewCtl.create);
+    router.put('/product/review/update', productReviewCtl.update);
 
     return parentRouter.use('/user', router);
 }
@@ -86,6 +92,7 @@ const initAdminRoutes = (parentRouter) => {
 const initOwnerRoutes = (parentRouter) => {
     const router = express.Router();
 
+    router.put('/user/role/change', userCtl.changeRole);
 
     return parentRouter.use('/owner', router);
 }
@@ -97,6 +104,8 @@ const initRegisteredRoutes = (parentRouter) => {
     router.put('/password/update', authCtl.changePassword);
 
     router.get('/profile', userCtl.findOne);
+
+    router.delete('/product/review/delete', productReviewCtl.destroy);
 
     return parentRouter.use('/registered', router);
 }

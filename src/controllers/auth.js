@@ -26,9 +26,9 @@ const login = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-    const { id } = req.tokenPayload;
+    const _id = req.tokenPayload._id;
 
-    authSv.logout(id, (err) => {
+    authSv.logout(_id, (err) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ message: 'Ok' });
     });
@@ -42,26 +42,21 @@ const signup = async (req, res) => {
     if (!passwordSv.isValid(password)) return res.status(400).json({ message: 'Invalid password length' });
 
     authSv.signup(email, phone, fullName, password, (err, user) => {
-        if (err) {
-            if (err instanceof CustomError && err.paramInfo.variable === 'password')
-                return res.status(400).json({ message: 'Missing password' });
-
-            return res.status(500).json({ message: 'Server error' });
-        }
+        if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ created: user })
     });
 }
 
 const changePassword = async (req, res) => {
-    const { id } = req.tokenPayload;
+    const _id = req.tokenPayload._id;
     const { oldPassword, newPassword } = req.body;
 
     const isVerified = await passwordSv.verify(id, oldPassword);
-    if (!isVerified) return res.status(401).json({ message: 'Incorrect old password' });
+    if (!isVerified) return res.status(401).json({ message: 'Incorrect verify password' });
 
-    passwordSv.generate(id, newPassword, (err) => {
+    passwordSv.generate(_id, newPassword, (err) => {
         if (err) {
-            if (err instanceof CustomError && err.paramInfo.variable === 'password')
+            if (err instanceof CustomError && err.name === 'EmptyPasswordError')
                 return res.status(400).json({ message: 'Missing new password' });
 
             return res.status(500).json({ message: 'Server error' });
@@ -76,10 +71,10 @@ const refreshAccessToken = async (req, res) => {
 
     tokenSv.refreshAccessToken(refreshToken, (err, accessToken) => {
         if (err) {
-            if (err instanceof CustomError && err.paramInfo.variable === 'tokenPair')
+            if (err instanceof CustomError && err.name === 'NotProvidedAnyTokenError')
                 return res.status(400).json({ message: 'Missing refresh token' });
 
-            if (err instanceof CustomError && err.name === 'TokenNotFoundError' && err.paramInfo.variable === 'tokenPair')
+            if (err instanceof CustomError && err.name === 'TokenNotFoundError')
                 return res.status(404).json({ message: 'Invalid refresh token' });
 
             return res.status(500).json({ message: 'Server error' });
