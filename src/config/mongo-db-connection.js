@@ -3,10 +3,9 @@ import mongoose from 'mongoose';
 const connectDB = async () => {
     try {
         const connection = await mongoose.connect(process.env.CONNECTION_STRING, {
-            useUnifiedTopology: true,
             serverSelectionTimeoutMS: 20000,
-            connectTimeoutMS: 30000,
-            socketTimeoutMS: 45000
+            connectTimeoutMS: 60000,
+            socketTimeoutMS: 60000
         });
         console.log('\x1b[32m%s\x1b[0m', `[MongoDB] connected: ${connection.connection.host}`);
     }

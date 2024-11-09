@@ -40,7 +40,7 @@ const update = async (req, res) => {
 
     if (!_id) return res.status(400).json({ message: 'Missing _id' });
 
-    productServices.update(_id, attributes, null, (err, updated) => {
+    productServices.update(_id, attributes, (err, updated) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ message: 'Ok' });
     });
