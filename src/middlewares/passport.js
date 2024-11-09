@@ -18,17 +18,16 @@ const checkRole = (role) => async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const accessToken = authHeader && authHeader.split(' ')[1];
 
-    // tokenServices.verify({ accessToken: accessToken }, (err, decode) => {
-    //     if (err || !decode) return res.status(401).json({ message: 'Unauthorized' });
+    tokenServices.verify({ accessToken: accessToken }, (err, decode) => {
+        if (err || !decode) return res.status(401).json({ message: 'Unauthorized' });
 
-    //     if (!userRoles[role]?.includes(decode.role))
-    //         return res.status(403).json({ message: 'Access denied' });
+        if (!userRoles[role]?.includes(decode.role))
+            return res.status(403).json({ message: 'Access denied' });
 
-    //     req.tokenPayload = decode;
+        req.tokenPayload = decode;
 
-    //     next();
-    // });
-    next();
+        next();
+    });
 }
 
 export default {

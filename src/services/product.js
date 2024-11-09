@@ -128,6 +128,9 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
             { $limit: +limit }
         ]);
 
+        for (const product of products)
+            product.rating = Math.floor(Math.random() * 5) + 1;
+
         if (callback) return callback(null, products);
         return products;
     }
