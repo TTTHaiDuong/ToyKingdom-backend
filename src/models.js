@@ -7,7 +7,7 @@ const initProduct = () => {
 
         discount: { type: Object, required: false },
         price: { type: Number, required: true },
-        stock: { type: Number, required: true },
+        stock: { type: Number, required: false },
         isSale: { type: Boolean, default: true },
 
         description: { type: String, required: false },
