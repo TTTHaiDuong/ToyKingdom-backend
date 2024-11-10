@@ -4,7 +4,7 @@ import { User } from '../models.js';
 import 'dotenv/config';
 
 const isValid = (password) => {
-    return password && password != ''
+    return password && password != '';
 }
 
 /**

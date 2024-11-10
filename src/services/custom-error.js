@@ -1,3 +1,4 @@
+/** Lỗi tuỳ chỉnh sử dụng trong ứng dụng */
 class CustomError extends Error {
     constructor(name, ...params) {
         super();

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+/** Model Sản phẩm */
 const initProduct = () => {
     const schema = new mongoose.Schema({
         name: { type: String, required: true },
@@ -15,10 +16,13 @@ const initProduct = () => {
         suitableAge: { type: Number, required: false },
         tag: { type: String, required: false }
     });
+
+    // Đặt index kiểu text dùng trong tìm kiếm sản phẩm bằng keyword
     schema.index({ name: 'text', category: 'text', description: 'text', brand: 'text', tag: 'text' });
     return mongoose.model('Product', schema, 'Product');
 }
 
+/** Model Hình ảnh sản phẩm */
 const initProductImage = () => {
     const schema = new mongoose.Schema({
         productId: { type: String, required: true },
@@ -30,6 +34,7 @@ const initProductImage = () => {
     return mongoose.model('ProductImage', schema, 'ProductImage');
 }
 
+/** Model Giỏ hàng */
 const initCart = () => {
     const schema = new mongoose.Schema({
         productId: { type: String, required: true },
@@ -37,13 +42,17 @@ const initCart = () => {
         quantity: { type: Number, required: true }
     });
 
+    // Hook sử dụng trước khi sử dụng hàm Cart.save()
+    // Dùng để cộng dồn quantity (số lượng sản phẩm) khi đã có cặp productId, userId trong document của database
     schema.pre('save', async (next) => {
         try {
+            // Tìm một sản phẩm có cặp productId, userId giống như giỏ hàng chuẩn bị thêm vào
             const existingDoc = await Cart.findOne({
                 productId: this.productId,
                 userId: this.userId
             });
 
+            // Nếu tồn tại document thì chỉ cập nhật quantity bằng cách cộng quantity mới vào quantity đã tồn tại
             if (existingDoc) {
                 existingDoc.quantity += this.quantity;
                 await existingDoc.save();
@@ -61,6 +70,7 @@ const initCart = () => {
     return mongoose.model('Cart', schema, 'Cart');
 }
 
+/** Model Thông tin về đã bán sản phẩm */
 const initSoldProduct = () => {
     const schema = new mongoose.Schema({
         productId: { type: String, required: true },
@@ -72,6 +82,7 @@ const initSoldProduct = () => {
     return mongoose.model('SoldProduct', schema, 'SoldProduct');
 }
 
+/** Model Đánh giá sản phẩm */
 const initProductReview = () => {
     const schema = new mongoose.Schema({
         productId: { type: String, required: true },
@@ -80,10 +91,13 @@ const initProductReview = () => {
         comment: { type: String, required: false },
         reviewDate: { type: Date, required: true }
     });
+
+    // Tạo index text dùng để tìm kiếm bằng keyword
     schema.index({ comment: 'text' });
     return mongoose.model('ProductReview', schema, 'ProductReview');
 }
 
+/** Model Người dùng */
 const initUser = () => {
     const schema = new mongoose.Schema({
         email: { type: String, required: true },
@@ -93,10 +107,13 @@ const initUser = () => {
         address: { type: String, required: false },
         role: { type: String, required: true }
     });
+
+    // Tạo index text dùng để tìm kiếm bằng keyword
     schema.index({ email: 'text', fullName: 'text', address: 'text' });
     return mongoose.model('User', schema, 'User');
 }
 
+/** Model Token */
 const initToken = () => {
     const schema = new mongoose.Schema({
         userId: { type: String, required: true },

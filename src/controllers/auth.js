@@ -2,22 +2,35 @@ import authSv from '../services/auth.js';
 import passwordSv from '../services/password.js';
 import tokenSv from '../services/token.js';
 import userSv from '../services/user.js';
-import sendEmail from '../old-services/send-email.js';
 import CustomError from '../services/custom-error.js';
 
+/**
+ * Đăng nhập
+ * 
+ * @param {Object} req Request từ client
+ * @param {{
+ * email: String,
+ * phone: String, 
+ * password: String }} req.body Body của request
+ * 
+ * @param {Object} res Response đến client
+ * @param {{
+ * accessToken: String,
+ * refreshToken: String }} res.body Body của response 
+ */
 const login = async (req, res) => {
     const { email, phone, password } = req.body;
 
-    if (!email && !phone) return res.status(400).json({ message: 'Missing email or phone' });
+    if (!email && !phone) return res.status(400).json({ message: 'Missing `email` or `phone`' });
     if (!password) return res.status(400).json({ message: 'Missing password' });
 
     authSv.login({ email, phone }, password, (err, tokenPair) => {
         if (err) {
             if (err instanceof CustomError && err.name === 'UserNotFoundError')
-                return res.status(404).json({ message: `Not existing ${email ? 'email' : 'phone'}` });
+                return res.status(404).json({ message: `Not existing ${email ? '`email`' : '`phone`'}` });
 
             if (err instanceof CustomError && err.name === 'IncorrectPasswordError')
-                return res.status(401).json({ message: 'Incorrect password' });
+                return res.status(401).json({ message: 'Incorrect `password`' });
 
             return res.status(500).json({ message: 'Server error' });
         }
@@ -25,21 +38,48 @@ const login = async (req, res) => {
     });
 }
 
+/** 
+ * Đăng xuất
+ * 
+ * @param {Object} req Request từ client
+ * @param {{
+ * ['x-refresh-token']: String }} req.headers Header của request
+ */
 const logout = async (req, res) => {
-    const _id = req.tokenPayload._id;
+    const refreshToken = req.headers['x-refresh-token'];
 
-    authSv.logout(_id, (err) => {
-        if (err) return res.status(500).json({ message: 'Server error' });
+    if (!refreshToken) return res.status(400).json({ message: 'Missing `x-refresh-token` in header' });
+
+    authSv.logout(refreshToken, (err) => {
+        if (err) {
+            if (err instanceof CustomError && err.name === 'UnrevokedLoginTokenError')
+                return res.status(400).json({ message: 'The refresh token is unavailable due to the invalid `x-refresh-token` in header' });
+
+            return res.status(500).json({ message: 'Server error' });
+        }
         return res.status(200).json({ message: 'Ok' });
     });
 }
 
+/**
+ * Đăng ký
+ * 
+ * @param {Object} req Request từ client
+ * @param {{
+ * email: String,
+ * phone: String,
+ * fullName: String,
+ * password: String}} req.body Body của request
+ * 
+ * @param {Object} res Response đến client
+ * @param {{created: User}} res.body Body của response
+ */
 const signup = async (req, res) => {
     const { email, phone, fullName, password } = req.body;
 
-    if (email && !(await userSv.validateEmail(email))) return res.status(400).json({ message: 'Invalid email' });
-    if (phone && !(await userSv.validatePhone(phone))) return res.status(400).json({ message: 'Invalid phone' });
-    if (!passwordSv.isValid(password)) return res.status(400).json({ message: 'Invalid password length' });
+    if (await userSv.validateEmail(email)) return res.status(400).json({ message: 'Missing or invalid `email`' });
+    if (phone && !(await userSv.validatePhone(phone))) return res.status(400).json({ message: 'Invalid `phone`' });
+    if (!passwordSv.isValid(password)) return res.status(400).json({ message: 'Missing or invalid `password`' });
 
     authSv.signup(email, phone, fullName, password, (err, user) => {
         if (err) return res.status(500).json({ message: 'Server error' });
@@ -47,48 +87,55 @@ const signup = async (req, res) => {
     });
 }
 
+/**
+ * Đổi mật khẩu
+ * 
+ * @param {Object} req Request từ client
+ * @param {{
+ * oldPassword: String,
+ * newPassword: String}} req.body Body của request
+ */
 const changePassword = async (req, res) => {
-    const _id = req.tokenPayload._id;
+    const userId = req.tokenPayload._id;
     const { oldPassword, newPassword } = req.body;
 
-    const isVerified = await passwordSv.verify(id, oldPassword);
-    if (!isVerified) return res.status(401).json({ message: 'Incorrect verify password' });
+    if (!passwordSv.isValid(newPassword)) return res.status(400).json({ message: 'Missing or invalid `newPassword`' });
 
-    passwordSv.generate(_id, newPassword, (err) => {
+    authSv.changePassword(userId, oldPassword, newPassword, (err) => {
         if (err) {
-            if (err instanceof CustomError && err.name === 'EmptyPasswordError')
-                return res.status(400).json({ message: 'Missing new password' });
+            if (err instanceof CustomError && err.name === 'IncorrectPasswordError')
+                return res.status(401).json({ message: 'Incorrect `oldPassword`' });
 
             return res.status(500).json({ message: 'Server error' });
         }
-        return res.status(200).json({ message: 'Ok' })
+        return res.status(200).json({ message: 'Ok' });
     });
 }
 
+/** 
+ * Đổi access token bằng refresh token
+ * 
+ * @param {Object} req Request từ client
+ * @param {{
+ * ['x-refresh-token']: String }} req.headers Header của request
+ * 
+ * @param {Object} res Response đến client
+ * @param {{accessToken: String}} res.body Thân của response
+ */
 const refreshAccessToken = async (req, res) => {
-    const authHeader = req.headers['x-refresh-token'];
-    const refreshToken = authHeader && authHeader.split(' ')[1];
+    const refreshToken = req.headers['x-refresh-token'];
+
+    if (!refreshToken) return res.status(400).json({ message: 'Missing `x-refresh-token` in header' });
 
     tokenSv.refreshAccessToken(refreshToken, (err, accessToken) => {
         if (err) {
-            if (err instanceof CustomError && err.name === 'NotProvidedAnyTokenError')
-                return res.status(400).json({ message: 'Missing refresh token' });
-
             if (err instanceof CustomError && err.name === 'TokenNotFoundError')
-                return res.status(404).json({ message: 'Invalid refresh token' });
+                return res.status(400).json({ message: 'Invalid refresh token' });
 
             return res.status(500).json({ message: 'Server error' });
         }
-        return res.status(200).json({ accessToken })
+        return res.status(200).json({ accessToken });
     });
-}
-
-/**
- * Yêu cầu gửi mã otp
- */
-let requestOtpVieEmail = async (req, res) => {
-    const { email } = req.body;
-    await sendEmail()
 }
 
 export default {

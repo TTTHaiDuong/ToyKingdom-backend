@@ -3,6 +3,14 @@ import { Token } from '../models.js';
 import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 
+/**
+ * Khởi tạo token và ghi lại trong cơ sở dữ liệu
+ * 
+ * @param {{_id: String, role: String}} payload Thông tin user băm cùng với mã token 
+ * @param {{accessToken: Boolean, refreshToken: Boolean}} option Tuỳ chọn muốn tạo access token hay refresh token 
+ * @param {function(Error?, {accessToken: String?, refreshToken: String?})} callback 
+ * @param {ClientSession} session Giao dịch (transaction)
+ */
 const generateAndRecord = async (payload, option, callback, session) => {
     try {
         // Ràng buộc phần thân dữ liệu mà token tải theo
@@ -44,9 +52,9 @@ const generateAndRecord = async (payload, option, callback, session) => {
 
 /**
  * Lấy access token bằng refresh token
- * @param {String} refreshToken refresh token
- * @param {function(String?, Error?)?} callback (accessToken, error)
- * @returns {Promise<String> | void}
+ * @param {String} refreshToken Refresh token 
+ * @param {function(Error?, String?)} callback 
+ * @returns {Promise<String>}
  */
 const refreshAccessToken = async (refreshToken, callback) => {
     try {
@@ -65,20 +73,21 @@ const refreshAccessToken = async (refreshToken, callback) => {
 /**
  * Xác thực token. Có thể dùng để xác thực chỉ một loại token.
  * Còn nếu truyền cả hai loại thì kết quả là tính xác thực của cả hai.
- * @param {{accessToken: String?, refreshToken: String?}} tokenPair access token hoặc refresh token
- * @param {function({id: Number, email: String, phone: String}?, Error?)?} callback
- * @returns {Promise<{id: Number, email: String, phone: String}> | void}
+ * @param {{accessToken: String?, refreshToken: String?}} tokenPair Access token hoặc refresh token
+ * @param {function(Error?, {_id: String, role: String}?)} callback
  */
 const verify = async (tokenPair, callback) => {
     try {
         const { accessToken, refreshToken } = tokenPair;
+
+        // Nếu cả hai loại token không được cung cấp
         if (!accessToken && !refreshToken) {
             const err = new CustomError('NotProvidedAnyTokenError');
             if (callback) return callback(err, null);
             throw err;
         }
 
-        // Lấy bản ghi chứa token từ database
+        // Đếm bản ghi chứa token từ database
         const tokenCount = await Token.countDocuments({
             ...(accessToken && { accessToken }),
             ...(refreshToken && { refreshToken })
@@ -109,8 +118,8 @@ const verify = async (tokenPair, callback) => {
 
 /**
  * @private Chuyển phương thức jwt.verify thành Promise
- * @param {String} token access token hoặc refresh token
- * @param {String} key private key của access token hoặc refresh token
+ * @param {String} token Access token hoặc refresh token
+ * @param {String} key Private key của access token hoặc refresh token
  */
 const verifyJwt = (token, key) => {
     return new Promise((resolve, reject) => {

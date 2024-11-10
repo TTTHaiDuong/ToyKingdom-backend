@@ -5,9 +5,22 @@ import tokenSv from './token.js';
 import userSv from './user.js';
 import { Token, User } from '../models.js';
 
+/** 
+ * Đăng nhập
+ * @param {{email: String?, phone: String?}} emailOrPhone Email hoặc số điện thoại
+ * @param {String} password Mật khẩu
+ * @param {function(Error?, {accessToken: String, refreshToken: String}?)} callback
+ */
 const login = async (emailOrPhone, password, callback) => {
     try {
         const { email, phone } = emailOrPhone;
+
+        // Ít nhất email hoặc phone phải có giá trị
+        if (!email && !phone) {
+            const err = new CustomError('NotProvidedEmailOrPhoneError');
+            if (callback) return callback(err, null);
+            throw err;
+        }
 
         // Tìm người dùng phù hợp với email hoặc số điện thoại trong CSDL
         const user = await User.findOne({
@@ -22,9 +35,10 @@ const login = async (emailOrPhone, password, callback) => {
             throw err;
         }
 
-        // Kiểm tra mật khẩu
+        // Tạo phần thân của token
         const payload = { _id: user._id.toString(), role: user.role };
 
+        // Xác thực mật khẩu
         const result = await passwordSv.verify(payload._id, password);
         if (!result) {
             const err = new CustomError('IncorrectPasswordError');
@@ -32,7 +46,7 @@ const login = async (emailOrPhone, password, callback) => {
             throw err;
         }
 
-        // Tạo cặp token ghi vào CSDL
+        // Tạo token ghi vào CSDL
         const tokenPair = await tokenSv.generateAndRecord(payload, {
             accessToken: true, refreshToken: true
         });
@@ -48,18 +62,17 @@ const login = async (emailOrPhone, password, callback) => {
 
 /**
  * Đăng xuất
- * @param {String} accessToken access token
- * @param {function(Error?)?} callback (error)
- * @returns {Promise<Error?> | void}
+ * @param {String} refreshToken Refresh token
+ * @param {function(Error?)} callback 
  */
-const logout = async (userId, callback) => {
+const logout = async (refreshToken, callback) => {
     try {
-        // Xoá bản ghi chứa access token hoặc refresh token
+        // Xoá bản ghi chứa refresh token
         const result = await Token.deleteOne({
-            userId: userId
+            refreshToken: refreshToken
         });
 
-        // Nếu login token chưa được thu hồi
+        // Nếu token chưa được thu hồi
         if (result.deletedCount === 0) {
             const err = new CustomError('UnrevokedLoginTokenError');
             if (callback) return callback(err);
@@ -74,6 +87,14 @@ const logout = async (userId, callback) => {
     }
 }
 
+/**
+ * Đăng ký
+ * @param {String} email Email
+ * @param {String} phone Số điện thoại
+ * @param {String} fullName Họ tên người dùng
+ * @param {String} password Mật khẩu
+ * @param {function(Error?, User?)} callback 
+ */
 const signup = async (email, phone, fullName, password, callback) => {
     try {
         const user = await userSv.create({ email, phone, password, fullName, role: 'user' });
@@ -86,8 +107,16 @@ const signup = async (email, phone, fullName, password, callback) => {
     }
 }
 
+/**
+ * Đổi mật khẩu
+ * @param {String} userId Mã người dùng
+ * @param {String} oldPassword Mật khẩu cũ
+ * @param {String} newPassword Mật khẩu mới
+ * @param {function(Error?)} callback 
+ */
 const changePassword = async (userId, oldPassword, newPassword, callback) => {
     try {
+        // Xác thực mật khẩu cũ
         const verification = await passwordSv.verify(userId, oldPassword);
 
         if (!verification) {
@@ -96,6 +125,7 @@ const changePassword = async (userId, oldPassword, newPassword, callback) => {
             throw err;
         }
 
+        // Khởi tạo mật khẩu mới
         await passwordSv.generate(userId, newPassword);
         if (callback) return callback(null);
     }

@@ -1,8 +1,8 @@
 import express from 'express';
+import connectDB from './src/config/db-connection.js';
 import cors from 'cors';
 import initWebRouters from './src/route/web.js';
-import 'dotenv/config.js';
-import connectDB from './src/config/mongo-db-connection.js';
+import 'dotenv/config';
 import seeder from './src/seeders/index.js';
 
 // Khởi tạo ứng dụng bằng express
@@ -27,9 +27,9 @@ app.use(express.urlencoded({ extended: true })); // Cấu hình xử lý dữ li
 
 initWebRouters(app); // Khởi tạo router
 
-connectDB();
+connectDB(); // Kết nối cơ sở dữ liệu
 
-// seeder.update();
+// seeder.update(); // Dùng để refresh dữ liệu database
 
 // Chạy server
 app.listen(+process.env.PORT, () => {

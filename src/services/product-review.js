@@ -1,5 +1,5 @@
 import { ProductReview } from "../models.js";
-import toQueryOperatorObject from "./mongoose-query-operator-object.js.js";
+import toQueryOperatorObject from "./mongoose-query-operator-object.js";
 import mongoose from 'mongoose';
 
 const create = async (attributes, callback, session) => {
@@ -52,7 +52,7 @@ const findAll = async (attributes, order, page = 1, limit = 10, callback) => {
 
 const update = async (_id, attributes, callback, session) => {
     try {
-        const image = await ProductImage.findOneAndUpdate(
+        const image = await ProductReview.findOneAndUpdate(
             { _id: _id },
             { $set: attributes },
             { new: true, ...(session && { session }) }
@@ -71,12 +71,10 @@ const destroy = async (ids, userId, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);
 
-        const result = await ProductImage.deleteMany({
+        const result = await ProductReview.deleteMany({
             _id: { $in: _ids },
             ...(userId && { userId })
-        }, {
-            ...(session && { session })
-        });
+        }, { session });
 
         if (callback) return callback(null, result);
         else return result;

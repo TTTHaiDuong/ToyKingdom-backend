@@ -1,5 +1,5 @@
 import { Product } from '../models.js';
-import toQueryOperatorObject from './mongoose-query-operator-object.js.js'
+import toQueryOperatorObject from './mongoose-query-operator-object.js'
 import mongoose from 'mongoose';
 
 const create = async (attributes, callback, session) => {
