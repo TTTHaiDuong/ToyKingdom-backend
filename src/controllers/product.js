@@ -1,5 +1,6 @@
 import productServices from '../services/product.js';
 
+/** Tạo sản phẩm */
 const create = async (req, res) => {
     const { attributes } = req.body;
 
@@ -9,6 +10,7 @@ const create = async (req, res) => {
     });
 }
 
+/** Tìm một sản phẩm bằng mã sản phẩm */
 const findOne = async (req, res) => {
     const { _id } = req.query;
     const { role } = req.tokenPayload || { role: 'any' };
@@ -21,6 +23,7 @@ const findOne = async (req, res) => {
     });
 }
 
+/** Tìm tất cả sản phẩm theo điều kiện */
 const findAll = async (req, res) => {
     const { filter, order, page, limit } = req.query;
     const { role } = req.tokenPayload || { role: 'any' };
@@ -35,6 +38,7 @@ const findAll = async (req, res) => {
     });
 }
 
+/** Cập nhật sản phẩm */
 const update = async (req, res) => {
     const { _id, attributes } = req.body;
 
@@ -46,6 +50,7 @@ const update = async (req, res) => {
     });
 }
 
+/** Xoá sản phẩm */
 const destroy = async (req, res) => {
     const { _ids } = req.body;
 

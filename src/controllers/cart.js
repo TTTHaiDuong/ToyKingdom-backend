@@ -90,7 +90,7 @@ const update = async (req, res) => {
     const userId = req.tokenPayload._id;
     const { _id, quantity } = req.body;
 
-    cartSv.update(_id, quantity, (err, cart) => {
+    cartSv.update(_id, userId, quantity, (err, cart) => {
         if (err) return res.status(500).json({ message: 'Server error' });
         return res.status(200).json({ updated: cart });
     })

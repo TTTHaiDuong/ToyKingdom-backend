@@ -1,5 +1,6 @@
 import productImageServices from '../services/product-image.js';
 
+/** Tạo sản phẩm */
 const create = async (req, res) => {
     const { productId, order, altText } = req.body;
     const { file } = req;
@@ -10,6 +11,7 @@ const create = async (req, res) => {
     });
 }
 
+/** Tìm hình ảnh sản phẩm */
 const find = async (req, res) => {
     const { productId, order } = req.query;
 
@@ -19,6 +21,7 @@ const find = async (req, res) => {
     });
 }
 
+/** Cập nhật hình ản sản phẩm */
 const update = async (req, res) => {
     const { _id, attributes } = req.body;
 
@@ -28,6 +31,7 @@ const update = async (req, res) => {
     });
 }
 
+/** Xoá hình ảnh */
 const destroy = async (req, res) => {
     const { _ids } = req.body;
 

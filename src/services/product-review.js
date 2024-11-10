@@ -2,6 +2,7 @@ import { ProductReview } from "../models.js";
 import toQueryOperatorObject from "./mongoose-query-operator-object.js";
 import mongoose from 'mongoose';
 
+/** Tạo đánh giá sản phẩm */
 const create = async (attributes, callback, session) => {
     try {
         let review = new ProductReview(attributes);
@@ -18,11 +19,13 @@ const create = async (attributes, callback, session) => {
     }
 }
 
+/** Tìm tất cả đánh giá sản phẩm */
 const findAll = async (attributes, order, page = 1, limit = 10, callback) => {
     try {
         const { keyword, _id, productId, userId, comment, rating, } = attributes;
 
         const reviews = await ProductReview.find({
+            // Tìm đánh giá theo các điều kiện
             ...(_id && { _id: Array.isArray(_id) ? { $regex: _id[0], $options: _id.length > 1 ? _id[1] : 'i' } : new mongoose.Types.ObjectId(_id) }),
             ...(productId && { productId: Array.isArray(productId) ? { $regex: productId[0], $options: productId.length > 1 ? productId[1] : 'i' } : productId }),
             ...(userId && { userId: Array.isArray(userId) ? { $regex: userId[0], $options: userId.length > 1 ? userId[1] : 'i' } : userId }),
@@ -50,6 +53,7 @@ const findAll = async (attributes, order, page = 1, limit = 10, callback) => {
     }
 }
 
+/** Cập nhật đánh giá sản phẩm */
 const update = async (_id, attributes, callback, session) => {
     try {
         const image = await ProductReview.findOneAndUpdate(
@@ -67,6 +71,7 @@ const update = async (_id, attributes, callback, session) => {
     }
 }
 
+/** Xoá đánh giá sản phẩm */
 const destroy = async (ids, userId, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);

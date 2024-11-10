@@ -1,5 +1,6 @@
 import productReviewSv from '../services/product-review.js';
 
+/** Tạo đánh giá sản phẩm */
 const create = async (req, res) => {
     const userId = req.tokenPayload._id;
     const { attributes } = req.body;
@@ -10,6 +11,7 @@ const create = async (req, res) => {
     });
 }
 
+/** Tìm các đánh giá sản phẩm */
 const findAll = async (req, res) => {
     const { filter, order, page, limit } = req.query;
 
@@ -21,6 +23,7 @@ const findAll = async (req, res) => {
     });
 }
 
+/** Cập nhật sản phẩm */
 const update = async (req, res) => {
     const userId = req.tokenPayload._id;
     const { _id, quantity } = req.body;
@@ -37,6 +40,7 @@ const update = async (req, res) => {
     }
 }
 
+/** Xoá sản phẩm */
 const destroy = async (req, res) => {
     const { _ids } = req.body;
     const { userId: _id, role } = req.tokenPayload;

@@ -1,11 +1,16 @@
 import { ProductImage } from "../models.js";
 import mongoose from 'mongoose';
 
+/**
+ * Thêm hình ảnh sản phẩm
+ */
 const create = async (attributes, callback, session) => {
     try {
         let image = new ProductImage(attributes);
         await image.save({ ...(session && { session }) });
+
         image = image.toObject();
+        image._id = image._id.toString();
         delete image.__v;
 
         if (callback) return callback(null, image);
@@ -17,6 +22,7 @@ const create = async (attributes, callback, session) => {
     }
 }
 
+/** Tìm hình ảnh sản phẩm */
 const find = async (productId, order, callback) => {
     try {
         const images = await ProductImage.find({
@@ -33,6 +39,7 @@ const find = async (productId, order, callback) => {
     }
 }
 
+/** Cập nhật hình ảnh sản phẩm */
 const update = async (_id, attributes, callback, session) => {
     try {
         const image = await ProductImage.findOneAndUpdate(
@@ -50,6 +57,7 @@ const update = async (_id, attributes, callback, session) => {
     }
 }
 
+/** Xoá hình ảnh sản phẩm */
 const destroy = async (ids, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);

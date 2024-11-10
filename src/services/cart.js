@@ -126,10 +126,10 @@ const findAll = async (criteria, order, page = 1, limit = 10, callback) => {
  * @param {function(Error?, Cart?)} callback 
  * @param {ClientSession} session Giao dịch (transaction) 
  */
-const update = async (_id, quantity, callback, session) => {
+const update = async (_id, userId, quantity, callback, session) => {
     try {
         const cart = await Cart.findOneAndUpdate(
-            { _id: _id },
+            { _id: _id, userId: userId },
             { quantity },
             { new: true, session }
         ).select('-__v');

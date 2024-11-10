@@ -2,6 +2,7 @@ import { Product } from '../models.js';
 import toQueryOperatorObject from './mongoose-query-operator-object.js'
 import mongoose from 'mongoose';
 
+/** Tạo sản phẩm */
 const create = async (attributes, callback, session) => {
     try {
         let product = new Product(attributes);
@@ -18,6 +19,7 @@ const create = async (attributes, callback, session) => {
     }
 }
 
+/** Tìm một sản phẩm bằng mã */
 const findOne = async (_id, exclude, callback) => {
     try {
         const product = (await findAll({ _id: _id }, null, exclude))[0];
@@ -30,6 +32,7 @@ const findOne = async (_id, exclude, callback) => {
     }
 }
 
+/** Tìm tất cả sản phẩm */
 const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback) => {
     try {
         const { keyword, _id, name, category, price, brand, suitableAge, tag, stock, isSale,
@@ -48,6 +51,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
 
         const products = await Product.aggregate([
             {
+                // Điều kiện lọc sản phẩm
                 $match: {
                     ...(_id && { _id: Array.isArray(_id) ? { $regex: _id[0], $options: _id.length > 1 ? _id[1] : 'i' } : new mongoose.Types.ObjectId(_id) }),
                     ...(name && { name: Array.isArray(name) ? { $regex: name[0], $options: name.length > 1 ? name[1] : 'i' } : name }),
@@ -70,11 +74,13 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
                 }
             },
             {
+                // Chuyển _id thành kiểu String để join với các document khác
                 $addFields: {
                     _idToString: { $toString: '$_id' }
                 }
             },
             {
+                // Join với các document hình ảnh sản phẩm
                 $lookup: {
                     from: 'ProductImage',
                     localField: '_idToString',
@@ -83,6 +89,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
                 }
             },
             {
+                // Join với lịch sử bán hàng
                 $lookup: {
                     from: 'SoldProduct',
                     localField: '_idToString',
@@ -91,6 +98,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
                 }
             },
             {
+                // Join với đánh giá sản phẩm
                 $lookup: {
                     from: 'ProductReview',
                     localField: '_idToString',
@@ -99,6 +107,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
                 }
             },
             {
+                // Thêm các trường revenue (doanh thu), totalSold (tổng số lượng đã bán), rating (tỉ lệ đánh giá trung bình), totalReviews (tổng số đánh giá)
                 $addFields: {
                     revenue: {
                         $sum: {
@@ -115,6 +124,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
                 }
             },
             {
+                // Điều kiện lọc trên các trường tổng hợp (revenue, totalSold, rating, totalReviews)
                 $match: {
                     ...(revenue && { revenue: Array.isArray(revenue) ? toQueryOperatorObject(revenue) : revenue }),
                     ...(totalSold && { totalSold: Array.isArray(totalSold) ? toQueryOperatorObject(totalSold) : totalSold }),
@@ -135,12 +145,12 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
         return products;
     }
     catch (err) {
-        console.error(err);
         if (callback) return callback(err, null);
         throw err;
     }
 }
 
+/** Cập nhật sản phẩm */
 const update = async (_id, attributes, callback, session) => {
     try {
         const product = await Product.findOneAndUpdate(
@@ -158,6 +168,7 @@ const update = async (_id, attributes, callback, session) => {
     }
 }
 
+/** Xoá sản phẩm */
 const destroy = async (ids, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);

@@ -4,6 +4,7 @@ import { User } from '../models.js';
 import mongoose from 'mongoose';
 import validator from 'validator';
 
+/** Xác thực tính hợp lệ của email */
 const validateEmail = async (email, callback) => {
     try {
         let err;
@@ -22,6 +23,7 @@ const validateEmail = async (email, callback) => {
     }
 }
 
+/** Tính hợp lệ của số điện thoại */
 const validatePhone = async (phone, callback) => {
     try {
         let err;
@@ -40,6 +42,7 @@ const validatePhone = async (phone, callback) => {
     }
 }
 
+/** Tạo người dùng */
 const create = async (attributes, callback, session) => {
     try {
         attributes.password = await bcrypt.hash(attributes.password, +process.env.SALT_LENGTH);
@@ -60,6 +63,7 @@ const create = async (attributes, callback, session) => {
     }
 }
 
+/** Cập nhật thông tin người dùng */
 const update = async (_id, attributes, callback, session) => {
     try {
         const { password } = attributes;
@@ -80,6 +84,7 @@ const update = async (_id, attributes, callback, session) => {
     }
 }
 
+/** Tìm người dùng bằng mã */
 const findOne = async (_id, exclude, callback) => {
     try {
         const user = (await findAll({ _id: _id }, null, exclude))[0];
@@ -92,6 +97,7 @@ const findOne = async (_id, exclude, callback) => {
     }
 }
 
+/** Tìm tất cả người dùng */
 const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback) => {
     try {
         const { keyword, _id, email, phone, fullName, role } = criteria || {};
@@ -132,6 +138,7 @@ const findAll = async (criteria, order, exclude, page = 1, limit = 10, callback)
     }
 }
 
+/** Xoá người dùng */
 const destroy = async (ids, callback, session) => {
     try {
         const _ids = Array.isArray(ids) ? ids.map(id => new mongoose.Types.ObjectId(id)) : new mongoose.Types.ObjectId(ids);

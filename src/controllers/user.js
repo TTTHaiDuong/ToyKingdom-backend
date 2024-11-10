@@ -1,6 +1,7 @@
 import userSv from '../services/user.js';
 import passport from '../middlewares/passport.js';
 
+/** Tìm một người dùng */
 const findOne = async (req, res) => {
     const userId = req.tokenPayload._id;
     const role = req.tokenPayload.role;
@@ -18,6 +19,7 @@ const findOne = async (req, res) => {
     });
 }
 
+/** Tìm tất cả người dùng */
 const findAll = (req, res) => {
     const { filter, page, limit, order } = req.query;
     const conditions = filter && JSON.parse(filter);
@@ -28,6 +30,7 @@ const findAll = (req, res) => {
     });
 }
 
+/** Cập nhật thông tin người dùng */
 const update = async (req, res) => {
     const { _id, attributes } = req.body;
     // const userId = req.tokenPayload._id;
@@ -46,6 +49,7 @@ const update = async (req, res) => {
     });
 }
 
+/** Xoá người dùng */
 const destroy = async (req, res) => {
     const { ids } = req.body;
 

@@ -3,19 +3,21 @@ import CustomError from './custom-error.js';
 import { User } from '../models.js';
 import 'dotenv/config';
 
+/** Kiểm tra tính hợp lệ của định dạng mật khẩu */
 const isValid = (password) => {
     return password && password != '';
 }
 
 /**
- * 
- * @param {Number} userId mã người dùng
- * @param {String} password mật khẩu
- * @param {function(Error?)?} callback 
- * @returns {Promise<void>}
+ * Khởi tạo mật khẩu (băm mật khẩu và cập nhật vào cơ sở dữ liệu)
+ * @param {String} userId Mã người dùng
+ * @param {String} password Mật khẩu
+ * @param {function(Error?)} callback 
+ * @param {ClientSession} session Giao dịch (transaction)
  */
 const generate = async (userId, password, callback, session) => {
     try {
+        // Kiểm tra tính hợp lệ của định dạng password
         if (isValid(password)) {
             const err = new CustomError('EmptyPasswordError');
             if (callback) return callback(err);
